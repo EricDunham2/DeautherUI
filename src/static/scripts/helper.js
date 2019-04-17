@@ -130,15 +130,3 @@ function fadeIn(el) {
       }, 100);
   });
 }
-
-function hideNavMenu(checkbox) {
-  if(checkbox.checked == true){
-      document.getElementById("sidebar-toggle").checked = false;
-  }
-}
-
-function hideSettingsMenu(checkbox) {
-  if(checkbox.checked == true){
-      document.getElementById("settings-toggle").checked = false;
-  }
-}

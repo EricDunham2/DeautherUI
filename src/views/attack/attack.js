@@ -77,9 +77,6 @@ Vue.component('attack', {
             }
         },
         onTileHover: function (item) {
-            console.log(this.hoveredItem);
-            console.log(item)
-
             this.hoveredItem = item;
         },
         offTileHover: function () {
@@ -157,7 +154,7 @@ Vue.component('attack', {
                                     </div>
                                 </template>
                                 <template v-else>
-                                    <div class="ap-information-panel__large l3 clickable no-touch-table action" style="background: #23096f; color: #05fc7c;" v-on:click="setSelectedAccesspoint()">
+                                    <div class="ap-information-panel__medium l3 clickable no-touch-table action" style="background: #23096f; color: #05fc7c;" v-on:click="setSelectedAccesspoint()">
                                         <div class="panel col-100">
                                             <div class="panel-header col-80 vhc">Back</div>
                                             <div class="panel-content vhc">
@@ -166,7 +163,7 @@ Vue.component('attack', {
                                         </div>
                                     </div>
                                     <div
-                                        class="ap-information-panel__large l5 clickable no-touch-table panel"
+                                        class="ap-information-panel__medium l5 clickable no-touch-table panel"
                                         v-on:click="selectStation(sta)"
                                         v-on:mouseover="onTileHover(sta)"
                                         v-on:mouseout="offTileHover()"

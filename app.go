@@ -3,6 +3,7 @@ package main
 import (
 	"html/template"
 	"net/http"
+	"os"
 	//"net/http/pprof"
 	"fmt"
 	"github.com/gobuffalo/packr"
@@ -24,6 +25,7 @@ const BAUD int = 115200 //Read from a file
 const PORT string = "/dev/ttyAMA0"
 const MSG_START byte = 0x02 
 const MSG_END byte = 0x03
+const CONFIG_PATH string = "./src/static/configs/config.json"
 
 type AccessPoint struct {
 	Ecn int //`json:"ecn"`
@@ -147,6 +149,9 @@ func initRoutes() {
 
 	router.HandleFunc("/accesspoints", getAccessPoints).Methods("GET")
 	router.HandleFunc("/getPackets", getPackets).Methods("GET")
+	router.HandleFunc("/getConfig", getConfig).Methods("GET")
+	router.HandleFunc("/setConfig", setConfig).Methods("POST")
+
 	router.HandleFunc("/getLogs", getLogs).Methods("GET")
 	router.HandleFunc("/deauth", deauthAttack).Methods("POST")
 
@@ -164,8 +169,6 @@ func initRoutes() {
 
 		i.ExecuteTemplate(w, "indexHTML", "")
 	})
-
-
 }
 
 func getAccessPoints(w http.ResponseWriter, r *http.Request) {
@@ -189,6 +192,69 @@ func getPackets(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(re)
 }
+
+func getConfig(w http.ResponseWriter, r *http.Request) {
+
+	if _, err := os.Stat(CONFIG_PATH); os.IsNotExist(err)  {
+		log_message("Config file does not exist...")
+		createConfig(`{"accesspoint":{"ssid":"Lambs to the Cosmic Slaughter","passwd":"Rick and Mortison","channel":12,"hidden":false},"scanner":{"interval":1000,"deep":true,"async":false,"channel":12,"hop":false}}`)
+	}
+
+
+	file, err := os.Open(CONFIG_PATH)
+
+	if err != nil {
+		log_message(err.Error())
+		return;
+	}
+
+	dat, err := ioutil.ReadAll(file)
+
+	if err != nil {
+		log_message(err.Error())
+		return
+	}
+
+	log_message("Getting Config...")
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(dat)
+}
+
+func setConfig(w http.ResponseWriter, r *http.Request) {
+	body, _ := ioutil.ReadAll(r.Body)
+
+	_, err := os.Stat(CONFIG_PATH)
+
+	if err == nil {
+		err := os.Remove(CONFIG_PATH)
+
+		if err != nil {
+			log_message("Error removing file...")
+		}
+	}
+	
+	createConfig(string(body))
+}
+
+func createConfig(data string) {
+	file, err := os.Create("./src/static/configs/config.json")
+
+	if err != nil {
+		log_message("Error creating new config file...")
+		return
+	}
+
+	_, err = file.Write([]byte(data))
+	
+	if err != nil {
+		log_message("Error writing to new config file...")
+		return
+	}
+
+	log_message("New config file connected...")
+}
+
 
 func deauthAttack(w http.ResponseWriter, r *http.Request) {
 	body, _ := ioutil.ReadAll(r.Body)

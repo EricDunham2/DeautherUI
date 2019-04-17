@@ -13,6 +13,7 @@
     <script src="/templates/logs/logs.js"></script>
     <script src="/templates/monitor/monitor.js"></script>
     <script src="/templates/home/home.js"></script>
+    <script src="/templates/settings/settings.js"></script>
     <script src="/templates/components/modal.js"></script>
     <meta name="viewport" content="width=device-width">
 </head>
@@ -21,8 +22,8 @@
     <div class="navbar vc">
         <div class="navbar-logo">
             <div class="navbar-icon vhc">
-                <input id="sidebar-toggle" type="checkbox" role="button" class="toggle-btn" onclick="hideSettingsMenu(this)"/>
-                <label for="sidebar-toggle" class="vhc toggle-ico"><i class="material-icons icon-sm logo-nav-icon"></i></label>
+                <input id="sidebar-toggle" type="checkbox" role="button" class="toggle-btn"/>
+                <label for="sidebar-toggle" class="vhc toggle-ico"><i class="material-icons icon-xs logo-nav-icon"></i></label>
                 <div class="nav-menu vhc">
                     <div class="panel col-100">
                         <div class="panel-content col-100 hc">
@@ -38,12 +39,17 @@
                             </a>
                             <a v-on:click="setComponent('attack')" class="l2 clickable no-touch-table navbar-menu-item col-100" style="height:60px;" v-bind:class="{ active: component == 'attack' }">
                                 <div class="panel col-100">
-                                    <div class="panel-header tc" style="font-size:25px">Attack</div>
+                                    <div class="panel-header tc" style="font-size:25px">Deauther</div>
                                 </div>
                             </a>
                             <a v-on:click="setComponent('logs')" class="l2 clickable no-touch-table navbar-menu-item col-100" style="height:60px;" v-bind:class="{ active: component == 'logs' }">
                                 <div class="panel col-100">
                                     <div class="panel-header tc" style="font-size:25px">Logs</div>
+                                </div>
+                            </a>
+                            <a v-on:click="setComponent('settings')" class="l2 clickable no-touch-table navbar-menu-item col-100" style="height:60px;" v-bind:class="{ active: component == 'settings' }">
+                                <div class="panel col-100">
+                                    <div class="panel-header tc" style="font-size:25px">Settings</div>
                                 </div>
                             </a>
                         </div>
@@ -59,79 +65,31 @@
                 <div class="vhc">Monitor</div>
             </a>
             <a v-on:click="setComponent('attack')" class="navbar-item vhc" v-bind:class="{ active: component == 'attack' }">
-                <div class="vhc">Attack</div>
+                <div class="vhc">Deauther</div>
             </a>
             <a v-on:click="setComponent('logs')" class="navbar-item vhc" v-bind:class="{ active: component == 'logs' }">
                 <div class="vhc">Logs</div>
             </a>
-        </div>
-        <div class="navbar-icon vhc pull-right" style="margin-right:2px;">
-            <input id="settings-toggle" type="checkbox" role="button" class="toggle-btn" onclick="hideNavMenu(this)"/>
-            <label for="settings-toggle" class="vhc toggle-ico"><i class="material-icons icon-sm" style="margin-right:10px;">settings</i></label>
-            <div class="settings-menu vhc">
-                <div class="panel col-100">
-                    <div class="panel-content col-100 hc">
-                        <fieldset style="margin:10px 0;">
-                            <legend>Accesspoint:</legend>
-                            <div class="input-group">
-                                <label for="ssid" id="panel-label" class="dyn-input-label">SSID</label> 
-                                <input type="text" id="panel-input" name="ssid" class="dyn-input" v-model="ssid">
-                            </div>
-
-                            <div class="input-group">
-                                <label for="password" id="panel-label" class="dyn-input-label">Password</label> 
-                                <input type="password" id="panel-input" name="password" class="dyn-input" v-model="password">
-                            </div>
-
-                            <div class="input-group">
-                                <label for="channel" id="panel-label" class="dyn-input-label">Channel</label> 
-                                <input type="number" max="12" min="1" id="panel-input" name="channel" class="dyn-input" v-model="channel">
-                            </div>
-
-                            <div class="input-group">
-                                <label for="hidden" id="panel-label" class="dyn-input-label">Hidden</label> 
-                                <input type="text" id="panel-input" name="hidden" class="dyn-input" v-model="hidden">
-                            </div>
-                        </fieldset>
-                        <fieldset style="margin:10px 0;">
-                            <legend>Scan:</legend>
-                            <div class="input-group">
-                                <label for="interval" id="panel-label" class="dyn-input-label">Interval</label> 
-                                <input type="number" min="0" id="panel-input" name="interval" class="dyn-input" v-model="interval">
-                            </div>
-
-                            <div class="input-group">
-                                <label for="hidden-scan" id="panel-label" class="dyn-input-label">Hidden</label> 
-                                <input type="text" id="panel-input" name="hidden-scan" class="dyn-input" v-model="hiddenScan">
-                            </div>
-
-                            <div class="input-group">
-                                <label for="async" id="panel-label" class="dyn-input-label">Async</label> 
-                                <input type="checkbox" id="panel-input" name="async" class="dyn-input" v-model="async">
-                            </div>
-
-                            <div class="input-group">
-                                <label for="hidden" id="panel-label" class="dyn-input-label">Channel</label> 
-                                <input type="text" id="panel-input" name="hidden" class="dyn-input" v-model="channelScan">
-                            </div>
-                        </fieldset>
-                    </div>
-                </div>
-            </div>
+            <a v-on:click="setComponent('settings')" class="navbar-item vhc" v-bind:class="{ active: component == 'settings' }">
+                <div class="vhc">Settings</div>
+            </a>
         </div>
     </div>
     <div class="content vhc">
+        <home v-if="component == 'home'"></home>
         <keep-alive>
-            <transition name="fade">
-                <home v-if="component == 'home'"></home>
-                <monitor v-if="component == 'monitor'"></monitor>
-                <attack v-if="component == 'attack'"></attack>
-                <logs v-if="component == 'logs'"></logs>
-            </transition>
+            <monitor v-if="component == 'monitor'"></monitor>
+        </keep-alive>
+        <keep-alive>
+            <attack v-if="component == 'attack'"></attack>
+        </keep-alive>
+        <keep-alive>
+            <logs v-if="component == 'logs'"></logs>
+        </keep-alive>
+        <keep-alive>
+            <settings v-if="component == 'settings'"></settings>
         </keep-alive>
     </div>
-    <script src="/templates/index.js"></script>
-    <script src="/static/scripts/helper.js"></script>
-    <attack-content></attack-content>
 </div>
+<script src="/templates/index.js"></script>
 {{end}}
