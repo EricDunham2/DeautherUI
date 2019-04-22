@@ -94,11 +94,9 @@ Vue.component('settings', {
                     </div>
                 </div>
             </div>
-            <div class="footer l2 vhc" style="position:fixed; bottom:0; height:max-content;">
-                <div class="vhc col-100">
-                    <div class="vhc" style="width:100%;">
-                        <label for="save" class="toggle-lbl vh-center" style="width:100%; margin:0;" v-on:click="saveConfig()"><span class="v-center" style="text-transform: uppercase;">Save</span></label>
-                    </div>
+            <div class="panel col-100 no-touch-top">
+                <div class="input-group">
+                    <label for="save" class="toggle-lbl vh-center" style="width:100%; margin:0;" v-on:click="saveConfig()"><span class="v-center" style="text-transform: uppercase;">Save</span></label>
                 </div>
             </div>
         </div>

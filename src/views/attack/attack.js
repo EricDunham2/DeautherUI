@@ -116,7 +116,7 @@ Vue.component('attack', {
         this._getAccesspoints();
     },
     template: `
-    <div>
+    <div class="col-100">
         <div class="flex-container col-100" id="content">
             <div class="flex-container col-100 no-touch-top" style="overflow:none;">
                 <div class="panel col-100">

@@ -388,7 +388,7 @@ func ft(t time.Time) string {
 	min := t.Minute()
 	sec := t.Second()
 
-	output := fmt.Sprintf("%d:%d:%d",
+	output := fmt.Sprintf("%02d:%02d:%02d",
 		hour,
 		min,
 		sec)

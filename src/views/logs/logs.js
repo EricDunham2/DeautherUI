@@ -16,7 +16,7 @@ Vue.component('logs', {
             
             response.data.forEach(log => {
                 var parts = log.split("]")
-                this.logs.push({time:`${parts[0]}]`, data:parts[1]});
+                this.logs.unshift({time:`${parts[0]}]`, data:parts[1]});
             });
         }
     },

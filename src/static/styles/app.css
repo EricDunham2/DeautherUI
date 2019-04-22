@@ -761,7 +761,13 @@ select {
 }
 
 .main-content-col {
-  height: 600px !important;
+  height: 110vh !important;
+}
+
+.main-screen-text {
+  transition: 0.4s all;
+  background: linear-gradient(to left, #9200ff, #00ffa6);
+  //background: linear-gradient(to left, #EB006D, #ED02CC,#B404F0, #5A07F2, #0913F5, #0C72F7, #0ED1F9, #11FCC8,#14FF6E);
 }
 
 .footer {
