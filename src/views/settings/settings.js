@@ -40,7 +40,17 @@ Vue.component('settings', {
                 scanner: this.scanner
             };
 
-            axios.post('/setConfig', JSON.stringify(data));
+            axios
+                .post('/setConfig', JSON.stringify(data))
+                .then(this.configConfirmation);
+        },
+        configConfirmation: function(result) {
+            if (!result || result.status !== 200) {
+                toastr("Something happened while saving, please try again...", "error", 1000);
+                return;
+            }
+
+            toastr("Save successful", "success", 1000);
         }
     },
     mounted() {
@@ -58,6 +68,7 @@ Vue.component('settings', {
                     <div class="input-group">
                         <label for="password" id="panel-label" class="dyn-input-label">Password</label> 
                         <input type="text" placeholder="Some Password" id="panel-input" name="password" class="dyn-input" v-model="accesspoint.passwd">
+                        <!--<i class="material-icons icon-xs" style="position: relative; color:#212121">visibility</i>-->
                     </div>
                     <div class="input-group">
                         <label for="channel" id="panel-label" class="dyn-input-label">Channel</label> 

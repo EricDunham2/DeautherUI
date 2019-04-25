@@ -18,13 +18,13 @@ input::-moz-focus-outer {
 }
 
 .error {
-  background: indianred;
-  color: black;
+  background: rgba(0, 0, 0, 0.4);
+  color: indianred;
 }
 
 .success {
-  background: mediumspringgreen;
-  color: black;
+  background: rgba(0, 0, 0, 0.4);
+  color: #04f886;
 }
 
 .l2 {
@@ -526,6 +526,12 @@ clip-path: polygon(0 20%, 100% 0, 100% 70%, 0 100%);
   display:flex;
   align-items: center;
   justify-content: center;
+}
+
+.toast {
+  position: sticky;
+  top: 40px;
+  width: 100%;
 }
 
 .parallax-top:before {

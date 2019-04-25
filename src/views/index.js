@@ -1,14 +1,6 @@
 new Vue({
     el: '#index',
     data: {
-        ssid: null,
-        password: null,
-        channel: null,
-        hidden: null,
-        interval: null,
-        hiddenScan: null,
-        async: null,
-        channelScan: null,
         component: "home",
     },
     methods: {
