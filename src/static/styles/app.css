@@ -10,6 +10,9 @@ body {
   height: 100vh;
   min-width: 100vw;
   overflow-x: hidden;
+  transition: 400ms cubic-bezier(0.4, 0, 0.2, 1);
+  -webkit-transition: 400ms cubic-bezier(0.4, 0, 0.2, 1);
+  -ms-transition: 400ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 input::-moz-focus-inner,
@@ -99,6 +102,7 @@ input::-moz-focus-outer {
   z-index: 10;
   position: sticky;
   top: 0px;
+  transition: 0.4s all;
 }
 
 .navbar-icon {
@@ -875,6 +879,8 @@ i.icon-xs {
 
 .navbar-menu-item {
   display: none;
+  transition: 0.4s all;
+  background: transparent;
 }
 
 .big-word-break {

@@ -308,8 +308,11 @@ func deauthStation(station Station) {
 	//Create the deauth packet that will be sent to the station aswell as the accesspoint
 	toStation = append(toStation, createPacket(ps)...)
 	toAccesspoint = append(toStation, createPacket(pa)...)
-	
-	log_message(fmt.Sprintf("Deauthing %#X...", station.Mac))
+
+	//log_message(fmt.Sprintf("%#X", createPacket(ps)))
+	//log_message(fmt.Sprintf("%#X", createPacket(pa)))
+
+	//log_message(fmt.Sprintf("Deauthing %#X...", station.Mac))
 
 	//Add the packets to the queue to be sent
 	writeQueue = append(writeQueue, toStation)
@@ -401,6 +404,7 @@ func log_message(message string) {
 		logs = logs[1:]
 	}
 
+	fmt.Println("[" + ft(time.Now()) + "] "  + message)
 	logs = append(logs, ("[" + ft(time.Now()) + "] "  + message))
 }
 
