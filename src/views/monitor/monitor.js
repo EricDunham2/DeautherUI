@@ -38,39 +38,39 @@ Vue.component('monitor', {
     <div class="flex-container col-100 no-touch-top vhc" style="max-height:100%; overflow-y:scroll;" id="monitor">
         <div class="table col-80">
             <div class="col-100 vc col-header" style="color: #cc14ab; border-bottom: 1px solid #673AB7; border-radius: 2px; padding-top: 20px;">
-                <div class="col-5 vhc"></div>
-                <div class="col-20 vhc">Source</div>
-                <div class="col-20 vhc">Destination</div>
-                <div class="col-5 vhc">RSSI</div>
-                <div class="col-5 vhc">CH</div>
-                <div class="col-10 vhc">Type</div>
-                <!--<div class="col-10 vhc">Enc</div>-->
-                <div class="col-30 vhc">Vendor</div>
+                <!--<div class="col-5 vhc" style="flex-grow:1;"></div>-->
+                <div class="col-30 vhc" style="flex-grow:1;">Source</div>
+                <div class="col-30 vhc" style="flex-grow:1;">Destination</div>
+                <div class="col-5 vhc" style="flex-grow:1;">RSSI</div>
+                <div class="col-5 vhc" style="flex-grow:1;">CH</div>
+                <div class="col-5 vhc" style="flex-grow:1;">Type</div>
+                <!--<div class="col-10 vhc" style="flex-grow:1;">Enc</div>-->
+                <div class="col-5 vhc" style="flex-grow:1;">Vendor</div>
             </div>
 
-            <div class="col-100 card-row" v-for="packet in packets">
-                <div class="col-5 vhc"></div> 
-                <div class="col-20 vhc">
+            <div class="col-100 card-row" style="flex-grow:1;" v-for="packet in packets">
+                <!--<div class="col-5 vhc"></div>-->
+                <div class="col-30 vhc" style="flex-grow:1;">
                     <div class="card-row-header">Source:</div>
                     <div v-text="packet.addr1"></div>
                 </div>
-                <div class="col-20 vhc">
+                <div class="col-30 vhc" style="flex-grow:1;">
                     <div class="card-row-header">Destination:</div>
                     <div v-text="packet.addr2"></div>
                 </div>
-                <div class="col-5 vhc">
+                <div class="col-5 vhc" style="flex-grow:1;">
                     <div class="card-row-header">RSSI:</div>
                     <div v-text="packet.rssi"></div>
                 </div>
-                <div class="col-5 vhc">
+                <div class="col-5 vhc" style="flex-grow:1;">
                     <div class="card-row-header">Ch:</div>
                     <div v-text="packet.channel"></div>
                 </div>
-                <div class="col-10 vhc">
+                <div class="col-5 vhc" style="flex-grow:1;">
                     <div class="card-row-header">Type:</div>
                     <div v-text="packet.pkt_type"></div>
                 </div>
-                <div class="col-30 vhc">
+                <div class="col-5 vhc" style="flex-grow:1;">
                     <div class="card-row-header">Type:</div>
                     <div v-text="packet.pkt_type"></div>
                 </div>

@@ -4,7 +4,7 @@ import (
 	"html/template"
 	"net/http"
 	"os"
-	//"net/http/pprof"
+	//"os/exec"
 	"fmt"
 	"github.com/gobuffalo/packr"
 	"github.com/gorilla/mux"
@@ -34,6 +34,17 @@ type AccessPoint struct {
 	RSSI int //`json:"rssi"`
 	Mac [6]byte //`json:"mac"`
 	Stations []Station //`json:"stations"`
+}
+
+type Packet struct {
+	DataType string `json:"data_type"`
+	Rssi     int    `json:"rssi"`
+	Channel  int    `json:"channel"`
+	PkyType  string `json:"pky_type"`
+	Src      string `json:"src"`
+	Dst      string `json:"dst"`
+	Bssid    string `json:"bssid"`
+	Ssid     string `json:"ssid"`
 }
 
 type Station struct {
@@ -236,6 +247,10 @@ func setConfig(w http.ResponseWriter, r *http.Request) {
 	
 	createConfig(string(body))
 }
+
+//func flash(w http.ResponseWriter, r *http.Request) {
+	//var cmd String = ""
+//}
 
 func createConfig(data string) {
 	file, err := os.Create("./src/static/configs/config.json")

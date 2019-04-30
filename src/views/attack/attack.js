@@ -119,6 +119,27 @@ Vue.component('attack', {
     <div class="col-100">
         <div class="flex-container col-100" id="content">
             <div class="flex-container col-100 no-touch-top" style="overflow:none;">
+                <div class="panel-content vhc" v-if="isAttacking" style="height:110vh; background: rgba(21,21,21,.7); position:absolute;">
+                    <div>
+                        <div class="row clearfix">
+                            <div class="square one"></div> 
+                            <div class="square two"></div>
+                            <div class="square three"></div>
+                        </div>
+
+                        <div class="row clearfix">
+                            <div class="square eight"></div> 
+                            <div class="square nine"></div>
+                            <div class="square four"></div>
+                        </div>
+
+                        <div class="row clearfix">
+                            <div class="square seven"></div> 
+                            <div class="square six"></div>
+                            <div class="square five"></div>
+                        </div>
+                    </div>
+                </div>
                 <div class="panel col-100">
                     <!--<div class="panel-header" style="position:sticky; top:0; color:crimson; height:45px;">
                         <div style="height:45px;">

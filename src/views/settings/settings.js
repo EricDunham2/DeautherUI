@@ -59,6 +59,16 @@ Vue.component('settings', {
     template: `
         <div class="flex-container col-100 hc no-touch-top">
             <div class="panel col-50 no-touch-top">
+                <div class="panel-header">Flash</div>
+                <div class="panel-content">
+                    <div class="input-group">
+                        <label for="save" class="toggle-lbl vh-center" style="width:100%; margin:0;" v-on:click="saveConfig()">
+                            <i class="material-icons icon-sm vhc">publish</i>
+                        </label>
+                    </div>
+                <div>
+            </div>
+            <div class="panel col-50 no-touch-top">
                 <div class="panel-header">Accesspoint</div>
                 <div class="panel-content">
                     <div class="input-group">
