@@ -27,6 +27,27 @@ const MSG_START byte = 0x02
 const MSG_END byte = 0x03
 const CONFIG_PATH string = "./src/static/configs/config.json"
 
+type Settings struct {
+	Ap struct {
+		Ssid    string `json:"ssid"`
+		Passwd  string `json:"passwd"`
+		Channel int    `json:"channel"`
+		Hidden  bool   `json:"hidden"`
+	} `json:"accesspoint"`
+	ApScanner struct {
+		Interval int  `json:"interval"`
+		Deep     bool `json:"deep"`
+		Async    bool `json:"async"`
+		Channel  int  `json:"channel"`
+		Hop      bool `json:"hop"`
+	} `json:"apScanner"`
+	PktScanner struct {
+		Interval int  `json:"interval"`
+		Channel  int  `json:"channel"`
+		Hop      bool `json:"hop"`
+	} `json:"packetScanner"`
+}
+
 type AccessPoint struct {
 	Ecn int //`json:"ecn"`
 	Etype string //`json:"etype"`
@@ -61,17 +82,23 @@ var (
 	readQueue []string
 	logs []string
 	sConn *serial.Port
-	channel int
+	//channel int
 	sniffing bool
+	settings Settings
 )
 
 func main() {
 	router = mux.NewRouter()
 
 	sniffing = false
-	channel = 11
 
-	log_message(fmt.Sprintf("Default channel set to %d...", channel))
+	//channel = 11
+	//log_message(fmt.Sprintf("Default channel set to %d...", channel))
+
+	settingsDat := readConfig()
+
+	json.Unmarshal(settingsDat, &settings)
+	log_message(fmt.Sprintf("Default settings set to %s...", settings))
 
 	initRoutes()
 	initMockData()
@@ -160,9 +187,9 @@ func initRoutes() {
 
 	router.HandleFunc("/accesspoints", getAccessPoints).Methods("GET")
 	router.HandleFunc("/getPackets", getPackets).Methods("GET")
+	router.HandleFunc("/sniffPackets", sniffPackets).Methods("GET")
 	router.HandleFunc("/getConfig", getConfig).Methods("GET")
 	router.HandleFunc("/setConfig", setConfig).Methods("POST")
-
 	router.HandleFunc("/getLogs", getLogs).Methods("GET")
 	router.HandleFunc("/deauth", deauthAttack).Methods("POST")
 
@@ -183,13 +210,12 @@ func initRoutes() {
 }
 
 func getAccessPoints(w http.ResponseWriter, r *http.Request) {
+	var cmd string = fmt.Sprintf("scan -async=%t -hidden=%t -channel=%d -hop=%t", settings.ApScanner.Async, settings.ApScanner.Deep, settings.ApScanner.Channel, settings.ApScanner.Hop)
+	fmt.Println(cmd)
 	//TODO Uncomment me for prod
-	/*var cmd = []byte("amap -c " + strconv.Itoa(channel))
-	writeQueue = append(writeQueue, cmd)*/
+	//writeQueue = append(writeQueue, cmd)
 
 	re, _ := json.Marshal(APL)
-
-	log_message("Getting accesspoint data...")
 
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(re)
@@ -198,33 +224,40 @@ func getAccessPoints(w http.ResponseWriter, r *http.Request) {
 func getPackets(w http.ResponseWriter, r *http.Request) {
 	re, _ := json.Marshal(readQueue)
 
-	log_message("Getting packets...")
-
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(re)
+}
+
+func sniffPackets(w http.ResponseWriter, r *http.Request) {
+	var cmd string = fmt.Sprintf("sniff -interval=%d -channel=%d -hop=%t", settings.PktScanner.Interval, settings.PktScanner.Channel, settings.PktScanner.Hop)
+
+	fmt.Println(cmd)
+	//TODO Uncomment me for prod
+	//writeQueue = append(writeQueue, cmd)
+
+	log_message("Sniffing packets")
+
+	w.Header().Set("Content-Type", "application/json")
+}
+
+func startAccessPoint() {
+	var cmd string = fmt.Sprintf("setup  -ssid=%q -hidden=%t -channel=%d -password=%q", settings.Ap.Ssid, settings.Ap.Hidden, settings.Ap.Channel, settings.Ap.Passwd)
+	
+	fmt.Println(cmd)
+	//TODO Uncomment me for prod
+	//writeQueue = append(writeQueue, cmd)
+
+	log_message("Starting accesspoint packets")
 }
 
 func getConfig(w http.ResponseWriter, r *http.Request) {
 
 	if _, err := os.Stat(CONFIG_PATH); os.IsNotExist(err)  {
 		log_message("Config file does not exist...")
-		createConfig(`{"accesspoint":{"ssid":"Lambs to the Cosmic Slaughter","passwd":"Rick and Mortison","channel":12,"hidden":false},"scanner":{"interval":1000,"deep":true,"async":false,"channel":12,"hop":false}}`)
+		createConfig(`{"accesspoint":{"ssid":"Lambs to the Cosmic Slaughter","passwd":"Rick and Mortison","channel":12,"hidden":false},"apScanner":{"interval":1000,"deep":true,"async":false,"channel":12,"hop":false},"packetScanner":{"interval":1000, "channel": 12, "hop": false}}`)
 	}
 
-
-	file, err := os.Open(CONFIG_PATH)
-
-	if err != nil {
-		log_message(err.Error())
-		return;
-	}
-
-	dat, err := ioutil.ReadAll(file)
-
-	if err != nil {
-		log_message(err.Error())
-		return
-	}
+	var dat []byte = readConfig()
 
 	log_message("Getting Config...")
 
@@ -246,6 +279,29 @@ func setConfig(w http.ResponseWriter, r *http.Request) {
 	}
 	
 	createConfig(string(body))
+
+	json.Unmarshal(body, &settings)
+	startAccessPoint()
+}
+
+func readConfig() []byte {
+	file, err := os.Open(CONFIG_PATH)
+
+	if err != nil {
+		log_message(err.Error())
+		return []byte{};
+	}
+
+	dat, err := ioutil.ReadAll(file)
+
+	if err != nil {
+		log_message(err.Error())
+		return []byte{};
+	}
+
+	json.Unmarshal(dat, &settings)
+
+	return dat
 }
 
 //func flash(w http.ResponseWriter, r *http.Request) {
@@ -270,7 +326,6 @@ func createConfig(data string) {
 	log_message("New config file connected...")
 }
 
-
 func deauthAttack(w http.ResponseWriter, r *http.Request) {
 	body, _ := ioutil.ReadAll(r.Body)
 	stations := []Station{}
@@ -292,7 +347,7 @@ func deauthAttack(w http.ResponseWriter, r *http.Request) {
 */
 
 func deauthStation(station Station) {
-	cmd := "send -d "
+	//cmd := "send -interval=%d -channel=%d -buffer=%s"
 
 	var pa [][]byte = [][]byte{
 		{0xC0, 0x00}, // Type, Subtype
@@ -314,15 +369,15 @@ func deauthStation(station Station) {
 		{0x01, 0x00},
 	}
 
-	var toStation []byte
-	var toAccesspoint []byte
+	//var toStation []byte
+	//var toAccesspoint []byte
 
-	toStation = append(toStation, []byte(cmd)...)
-	toAccesspoint = append(toAccesspoint, []byte(cmd)...)
+	//toStation = append(toStation, []byte(cmd)...)
+	//toAccesspoint = append(toAccesspoint, []byte(cmd)...)
 
 	//Create the deauth packet that will be sent to the station aswell as the accesspoint
-	toStation = append(toStation, createPacket(ps)...)
-	toAccesspoint = append(toStation, createPacket(pa)...)
+	//toStation = append(toStation, createPacket(ps)...)
+	//toAccesspoint = append(toStation, createPacket(pa)...)
 
 	//log_message(fmt.Sprintf("%#X", createPacket(ps)))
 	//log_message(fmt.Sprintf("%#X", createPacket(pa)))
@@ -330,8 +385,14 @@ func deauthStation(station Station) {
 	//log_message(fmt.Sprintf("Deauthing %#X...", station.Mac))
 
 	//Add the packets to the queue to be sent
-	writeQueue = append(writeQueue, toStation)
-	writeQueue = append(writeQueue, toAccesspoint)
+	cmd := fmt.Sprintf("send -interval=%d -channel=%d -buffer=%s", 1000, 12, createPacket(pa))
+	fmt.Println(cmd)
+	//writeQueue = append(writeQueue, []byte(cmd))
+
+	cmd = fmt.Sprintf("send -interval=%d -channel=%d -buffer=%s", 1000, 12, createPacket(ps))
+	fmt.Println(cmd)
+
+	//writeQueue = append(writeQueue, []byte(cmd))
 }
 
 /*
@@ -367,7 +428,7 @@ func ReadHandler()([]byte, error) {
 		if !building && len(writeQueue) > 0 {return nil, nil }
 
 		_, err := sConn.Read(ch)
-		if err != nil {return nil, err }
+		if err != nil { return nil, err }
 
 		if ch[0] == MSG_START {
 			building = true;

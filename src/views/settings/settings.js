@@ -7,10 +7,15 @@ Vue.component('settings', {
                 channel: null,
                 hidden: null,
             },
-            scanner: {
+            apScanner: {
                 interval: null,
                 deep: null,
                 async: null,
+                channel: null,
+                hop: null
+            },
+            packetScanner: {
+                interval: null,
                 channel: null,
                 hop: null
             }
@@ -28,7 +33,8 @@ Vue.component('settings', {
             }
 
             this.accesspoint = result.data.accesspoint;
-            this.scanner = result.data.scanner;
+            this.apScanner = result.data.apScanner;
+            this.packetScanner = result.data.packetScanner;
 
             $(function () {
                 custom_input();
@@ -37,7 +43,8 @@ Vue.component('settings', {
         saveConfig: function () {
             var data = {
                 accesspoint: this.accesspoint,
-                scanner: this.scanner
+                apScanner: this.apScanner,
+                packetScanner: this.packetScanner
             };
 
             axios
@@ -58,7 +65,7 @@ Vue.component('settings', {
     },
     template: `
         <div class="flex-container col-100 hc no-touch-top">
-            <div class="panel col-50 no-touch-top">
+            <div class="panel col-100 no-touch-top">
                 <div class="panel-header">Flash</div>
                 <div class="panel-content">
                     <div class="input-group">
@@ -66,9 +73,9 @@ Vue.component('settings', {
                             <i class="material-icons icon-sm vhc">publish</i>
                         </label>
                     </div>
-                <div>
+                </div>
             </div>
-            <div class="panel col-50 no-touch-top">
+            <div class="panel col-30 no-touch-top" style="vertical-align: top;">
                 <div class="panel-header">Accesspoint</div>
                 <div class="panel-content">
                     <div class="input-group">
@@ -90,28 +97,46 @@ Vue.component('settings', {
                     </div>
                 </div>
             </div>
-            <div class="panel col-50 no-touch-top">
-                <div class="panel-header">Scanner</div>
+            <div class="panel col-30 no-touch-top " style="vertical-align: top;">
+                <div class="panel-header">Accesspoint Scanner</div>
                 <div class="panel-content">
                     <div class="input-group">
                         <label for="interval" id="panel-label" class="dyn-input-label">Interval</label> 
-                        <input type="text" placeholder="1000" id="panel-input" name="interval" class="dyn-input" v-model="scanner.interval">
+                        <input type="text" placeholder="1000" id="panel-input" name="interval" class="dyn-input" v-model="apScanner.interval">
                     </div>
                     <div class="input-group">
                         <label for="deep" id="panel-label" class="dyn-input-label">Deep</label> 
-                        <input type="text" placeholder="false/true" id="panel-input" name="deep" class="dyn-input" v-model="scanner.deep">
+                        <input type="text" placeholder="false/true" id="panel-input" name="deep" class="dyn-input" v-model="apScanner.deep">
                     </div>
                     <div class="input-group">
                         <label for="async" id="panel-label" class="dyn-input-label">Async</label> 
-                        <input type="text" placeholder="false/true" id="panel-input" name="async" class="dyn-input" v-model="scanner.async">
+                        <input type="text" placeholder="false/true" id="panel-input" name="async" class="dyn-input" v-model="apScanner.async">
                     </div>
                     <div class="input-group">
                         <label for="channel" id="panel-label" class="dyn-input-label">Channel</label> 
-                        <input type="text" placeholder="1-12" id="panel-input" name="channel" class="dyn-input" v-model="scanner.channel">
+                        <input type="text" placeholder="1-12" id="panel-input" name="channel" class="dyn-input" v-model="apScanner.channel">
                     </div>
                     <div class="input-group">
                         <label for="hop" id="panel-label" class="dyn-input-label">Hop</label> 
-                        <input type="text" placeholder="false/true" id="panel-input" name="hop" class="dyn-input" v-model="scanner.hop">
+                        <input type="text" placeholder="false/true" id="panel-input" name="hop" class="dyn-input" v-model="apScanner.hop">
+                    </div>
+                </div>
+            </div>
+            <div class="panel col-30 no-touch-top" style="vertical-align: top;">
+                <div class="panel-header">Packet Scanner</div>
+                <div class="panel-content">
+                    <div class="input-group">
+                        <label for="interval" id="panel-label" class="dyn-input-label">Interval</label> 
+                        <input placeholder="1000" type="text" id="panel-input" name="interval" class="dyn-input" v-model="packetScanner.interval">
+                    </div>
+                    <div class="input-group">
+                        <label for="channel" id="panel-label" class="dyn-input-label">Channel</label> 
+                        <input type="text" placeholder="1-12" min="1" max="12" id="panel-input" name="channel" class="dyn-input" v-model="packetScanner.channel">
+                        <!--<i class="material-icons icon-xs" style="position: relative; color:#212121">visibility</i>-->
+                    </div>
+                    <div class="input-group">
+                        <label for="hop" id="panel-label" class="dyn-input-label">Hop</label> 
+                        <input type="text" placeholder="false/true" id="panel-input" name="hop" class="dyn-input" v-model="packetScanner.hop">
                     </div>
                 </div>
             </div>

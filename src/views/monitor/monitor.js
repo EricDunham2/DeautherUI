@@ -32,7 +32,6 @@ Vue.component('monitor', {
         }, 300);
     },
     beforeDestroy() {
-        clearInterval(this.monitorInterval);
     },
     template : `
     <div class="flex-container col-100 no-touch-top vhc" style="max-height:100%; overflow-y:scroll;" id="monitor">

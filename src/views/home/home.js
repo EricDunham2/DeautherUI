@@ -81,7 +81,7 @@ Vue.component('home', {
                         },
                     "onclick": {
                         "enable": true,
-                        "mode": "bubble"
+                        "mode": "push"
                         },
                         "resize": true
                     },
@@ -118,7 +118,7 @@ Vue.component('home', {
     methods: {
         particles() {
             particlesJS("particles-js", this.particle_config);
-        }
+        },
     },
     mounted() {
         this.particles();

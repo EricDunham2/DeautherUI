@@ -17,6 +17,14 @@ Vue.component('attack', {
         }
     },
     methods: {
+        _getPackets: function() {
+            axios
+            .get("/getPackets")
+            .then(this._setPackets)
+        },
+        _setPackets: function(response) {
+            if (!response.data) { return; }
+        },
         _getAccesspoints: function () {
             axios
                 .get("/accesspoints")
@@ -113,7 +121,15 @@ Vue.component('attack', {
         }
     },
     beforeMount() {
-        this._getAccesspoints();
+        this.packets = [];
+
+        setInterval(() => {
+            this._getAccesspoints();
+        }, 2000);
+
+       setInterval(() => {
+            this._getPackets();
+        }, 2000);
     },
     template: `
     <div class="col-100">

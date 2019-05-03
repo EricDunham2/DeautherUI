@@ -1,1 +1,1 @@
-{"accesspoint":{"ssid":"Lambs to the Cosmic Slaughter","passwd":"Rick and Mortison","channel":12,"hidden":false},"scanner":{"interval":1000,"deep":true,"async":false,"channel":12,"hop":false}}
+{"accesspoint":{"ssid":"Lambs to the Cosmic Slaughters","passwd":"Rick and Mortison","channel":12,"hidden":false},"apScanner":{"interval":1000,"deep":true,"async":false,"channel":12,"hop":false},"packetScanner":{"interval":1000,"channel":12,"hop":false}}
