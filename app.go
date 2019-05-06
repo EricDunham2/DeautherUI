@@ -418,17 +418,25 @@ func WriteHandler(data []byte) {
 	//sConn.Write(data)
 }
 
-func ReadHandler()([]byte, error) {
+func ReadHandler() []byte {
 	var building bool = false
 	var buf []byte
 	var ch []byte = make([]byte, 1)
 
+	_, err := sConn.Read(ch)
+	if err != nil {
+		log_message(err.Error())
+		return nil
+	}
+
 	for ch[0] != MSG_END {
+		if !building && len(writeQueue) > 0 { return []byte{} }
 
-		if !building && len(writeQueue) > 0 {return nil, nil }
-
-		_, err := sConn.Read(ch)
-		if err != nil { return nil, err }
+		_, err = sConn.Read(ch)
+		if err != nil {
+			log_message(err.Error())
+			return nil
+		}
 
 		if ch[0] == MSG_START {
 			building = true;
@@ -438,8 +446,7 @@ func ReadHandler()([]byte, error) {
 			buf = append(buf, ch[0])
 		}
 	}
-
-	return buf, nil
+	return buf
 }
 
 func ActionHandler() {
@@ -453,7 +460,7 @@ func ActionHandler() {
 
 			WriteHandler(data);
 		} else {
-			byteRead, _ := ReadHandler();
+			byteRead := ReadHandler();
 			
 			if byteRead != nil {
 				readQueue = append(readQueue, string(byteRead))
@@ -476,6 +483,7 @@ func ft(t time.Time) string {
 }
 
 func log_message(message string) {
+
 	if (len(logs) > 1500) {
 		logs = logs[1:]
 	}
