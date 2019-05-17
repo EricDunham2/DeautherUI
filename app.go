@@ -116,11 +116,30 @@ func main() {
 func initSerial() {
 	log_message("Opening serial connection...")
 
-	c := &serial.Config{Name: PORT, Baud: BAUD, ReadTimeout: time.Second * 5}
-	sConn, _ = serial.OpenPort(c)
+	ports, err := serial.GetPortsList()
+
+	if err != nil {
+		log_message(err.Error())
+		return
+	}
+
+	if len(ports) == 0 {
+		log_message("No serial ports were found...")
+		return
+	}
+
+	mode := &serial.Mode {
+		BaudRate: BAUD
+	}
+
+	sConn, err := serial.Open(PORT, mode)
+
+	if err != nil {
+		log_message(err.Error())
+		return
+	}
 
 	log_message("Serial connection opened...")
-
 }
 
 func initMockData() {
@@ -416,7 +435,11 @@ func WriteHandler(data []byte) {
 	
 	data = append(data, 0x0A);
 	//!Uncomment me
-	//sConn.Write(data)
+	/*n, err := sConn.Write(data)
+
+	if err != nil {
+		log_message(err.Error())
+	}*/
 }
 
 func ReadHandler() []byte {
@@ -424,7 +447,8 @@ func ReadHandler() []byte {
 	var buf []byte
 	var ch []byte = make([]byte, 1)
 
-	_, err := sConn.Read(ch)
+	n, err := sConn.Read(ch)
+
 	if err != nil {
 		log_message(err.Error())
 		return nil
@@ -447,6 +471,7 @@ func ReadHandler() []byte {
 			buf = append(buf, ch[0])
 		}
 	}
+	
 	return buf
 }
 
