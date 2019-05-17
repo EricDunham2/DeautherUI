@@ -4,6 +4,7 @@ import (
 	"html/template"
 	"net/http"
 	"os"
+	"go.bug.st/serial.v1" //Use me instead of tarm
 	//"os/exec"
 	"fmt"
 	"github.com/gobuffalo/packr"
