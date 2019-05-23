@@ -37,26 +37,22 @@ Vue.component('attack', {
 
             console.log(response.data)
 
-            response.data.forEach(ap => {
-                ap.fmtMac = this._createMacString(ap.Mac);
+            Object.values(response.data).forEach(ap => {
+                //ap.fmtMac = this._createMacString(ap.bssid);
 
-                if (!ap.Stations || !ap.Stations.length) {
+                if (!ap.stations || !ap.stations.length) {
                     return;
                 }
-                ap.Stations.forEach(sta => {
+                ap.stations.forEach(sta => {
                     sta.selected = false; //Changes so that when rescans it doesnt overwrite old values
-                    sta.fmtMac = this._createMacString(sta.Mac);
-                    sta.AP = ap.Mac;
+                   //sta.fmtMac = this._createMacString(sta.mac);
+                    sta.ap = ap.bssid;
                 });
             });
 
-            this.accesspoints = response.data;
+            this.accesspoints = Object.values(response.data);
         },
         _createMacString: function (arr) {
-            if (arr.length > 6) {
-                return;
-            }
-
             return `${this._toHex(arr[0])}:${this._toHex(arr[1])}:${this._toHex(arr[2])}:${this._toHex(arr[3])}:${this._toHex(arr[4])}:${this._toHex(arr[5])}`;
         },
         _toHex: function (byte) {
@@ -80,7 +76,7 @@ Vue.component('attack', {
                 }
                 this.selectedStations.push(sta);
             } else {
-                var index = this.selectedStations.findIndex(st => st.Mac === sta.Mac);
+                var index = this.selectedStations.findIndex(st => st.mac === sta.mac);
                 this.selectedStations.splice(index, 1);
             }
         },
@@ -160,7 +156,7 @@ Vue.component('attack', {
                     <!--<div class="panel-header" style="position:sticky; top:0; color:crimson; height:45px;">
                         <div style="height:45px;">
                             <div v-text="hoveredItem.fmtMac" v-if="hoveredItem"></div>
-                            <div v-text="hoveredItem.SSID" v-if="hoveredItem"></div>
+                            <div v-text="hoveredItem.ssid" v-if="hoveredItem"></div>
                         </div>
                     </div>-->
                     <div class="panel-content flex-container" style="height:calc(100% - 155px)">
@@ -176,14 +172,14 @@ Vue.component('attack', {
                                         v-for="ap in accesspoints"
                                     >
                                         <div class="panel-header vhc">
-                                            <div v-text="ap.SSID"></div>
+                                            <div v-text="ap.ssid"></div>
                                         </div>
                                         <div class="panel-content vhc">
-                                            <img v-if="ap.RSSI == 0" class="icon-md" src="/static/images/wifi_0_grey.png">
-                                            <img v-else-if="ap.RSSI > 0 && ap.RSSI < 25" class="icon-md" src="/static/images/wifi_1_grey.png">	
-                                            <img v-else-if="ap.RSSI >= 25 && ap.RSSI < 50" class="icon-md" src="/static/images/wifi_2_grey.png">	
-                                            <img v-else-if="ap.RSSI >= 50 && ap.RSSI < 75" class="icon-md" src="/static/images/wifi_3_grey.png">	
-                                            <img v-else-if="ap.RSSI >= 75 && ap.RSSI <= 100" class="icon-md" src="/static/images/wifi_4_grey.png">	
+                                            <img v-if="ap.rssi == 0" class="icon-md" src="/static/images/wifi_0_grey.png">
+                                            <img v-else-if="ap.rssi > 0 && ap.rssi < 25" class="icon-md" src="/static/images/wifi_1_grey.png">	
+                                            <img v-else-if="ap.rssi >= 25 && ap.rssi < 50" class="icon-md" src="/static/images/wifi_2_grey.png">	
+                                            <img v-else-if="ap.rssi >= 50 && ap.rssi < 75" class="icon-md" src="/static/images/wifi_3_grey.png">	
+                                            <img v-else-if="ap.rssi >= 75 && ap.rssi <= 100" class="icon-md" src="/static/images/wifi_4_grey.png">	
                                         </div>
                                         <div class="panel-footer vhc">
                                             <div v-text="ap.fmtMac"></div>
@@ -204,11 +200,11 @@ Vue.component('attack', {
                                         v-on:click="selectStation(sta)"
                                         v-on:mouseover="onTileHover(sta)"
                                         v-on:mouseout="offTileHover()"
-                                        v-for="sta in selectedAccesspoint.Stations"
+                                        v-for="sta in selectedAccesspoint.stations"
                                         v-if="!sta.selected"
                                     >
                                         <div class="panel-header vhc">
-                                            <div v-text="sta.Vendor"></div>
+                                            <div v-text="sta.vendor"></div>
                                         </div>
                                         <div class="panel-content vhc">
                                             <i class="material-icons icon-md vhc">devices</i>
@@ -227,7 +223,7 @@ Vue.component('attack', {
                                 v-on:mouseover="onTileHover(sta)" v-on:mouseout="offTileHover()">
                                     <div class="panel col-100">
                                         <div class="panel-header vhc">
-                                            <div v-text="sta.Vendor"></div>
+                                            <div v-text="sta.vendor"></div>
                                         </div>
                                         <div class="panel-content vhc">
                                             <i class="material-icons icon-md vhc">devices</i>

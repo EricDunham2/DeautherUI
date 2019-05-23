@@ -4,20 +4,17 @@ import (
 	"html/template"
 	"net/http"
 	"os"
-	"go.bug.st/serial.v1" //Use me instead of tarm
+	"net"
+	"go.bug.st/serial.v1"
 	//"os/exec"
 	"fmt"
 	"github.com/gobuffalo/packr"
 	"github.com/gorilla/mux"
 	"encoding/json"
-	"github.com/tarm/serial"
 	"time"
 	//"strconv"
 	"io/ioutil"
-	//"github.com/pkg/profile"
-
-	//"strings"
-	//"log"
+	"log"
 	//"reflect"
 )
 
@@ -49,47 +46,61 @@ type Settings struct {
 	} `json:"packetScanner"`
 }
 
-type AccessPoint struct {
+/*type AccessPoint struct {
 	Ecn int //`json:"ecn"`
 	Etype string //`json:"etype"`
 	SSID string //`json:"ssid"`
 	RSSI int //`json:"rssi"`
 	Mac [6]byte //`json:"mac"`
 	Stations []Station //`json:"stations"`
+}*/
+
+type AccessPoint struct {
+	Ssid     string    	`json:"ssid"`
+	Enc  	 int    	`json:"enc"`
+	Rssi	 int 		`json:"rssi"`
+	Bssid    string 	`json:"bssid"`
+	Channel  int 		`json:"channel"`
+	Hidden   bool 		`json:"hidden"`
+	Stations []Station	`json:"stations"`
 }
 
 type Packet struct {
-	DataType string `json:"data_type"`
-	Rssi     int    `json:"rssi"`
-	Channel  int    `json:"channel"`
-	PkyType  string `json:"pky_type"`
-	Src      string `json:"src"`
-	Dst      string `json:"dst"`
-	Bssid    string `json:"bssid"`
-	Ssid     string `json:"ssid"`
+	Rssi     	int    `json:"rssi"`
+	Channel  	int    `json:"channel"`
+	PktType  	string `json:"pkt_type"`
+	Src      	string `json:"src"`
+	Dst      	string `json:"dst"`
+	Bssid    	string `json:"bssid"`
+	Ssid     	string `json:"ssid"`
 }
 
 type Station struct {
-	Name string //`json:"name"`
-	Vendor string //`json:"vendor"`
-	Mac [6]byte //`json:"mac"`
-	AP []byte //`json:"ap"`
+	Name 	string 	`json:"name"`
+	Vendor 	string 	`json:"vendor"`
+	Mac 	[]byte	`json:"mac"`
+	MacStr  string 	`json:"macStr"`
+	AP 		[]byte 	`json:"ap"`
+	APStr	string 	`json:"apStr"`
 }
 
 var (
-	APL []AccessPoint
+	AvailableAccesspoints map[string]AccessPoint
 	router * mux.Router
+	//APL []AccessPoint //Depcrated, Remove .
 	writeQueue [][]byte
 	readQueue []string
+
+	packets []Packet
 	logs []string
-	sConn *serial.Port
-	//channel int
+	sConn serial.Port
 	sniffing bool
 	settings Settings
 )
 
 func main() {
 	router = mux.NewRouter()
+	log.SetFlags(log.LstdFlags | log.Lshortfile)
 
 	sniffing = false
 
@@ -97,53 +108,53 @@ func main() {
 	//log_message(fmt.Sprintf("Default channel set to %d...", channel))
 
 	settingsDat := readConfig()
-
+	AvailableAccesspoints = make(map[string]AccessPoint)
 	json.Unmarshal(settingsDat, &settings)
 	log_message(fmt.Sprintf("Default settings set to %s...", settings))
 
 	initRoutes()
 	initMockData()
 
-	//defer profile.Start().Stop()
-	//defer profile.Start(profile.MemProfile).Stop()
+	if initSerial() {
+		go ActionHandler();
+	}
 
-	go ActionHandler();
+	go handlerData();
 
 	http.ListenAndServe(":8081", router)
 }
 
 
-func initSerial() {
+func initSerial() bool{
 	log_message("Opening serial connection...")
 
 	ports, err := serial.GetPortsList()
 
 	if err != nil {
 		log_message(err.Error())
-		return
+		return false
 	}
 
 	if len(ports) == 0 {
 		log_message("No serial ports were found...")
-		return
+		return false
 	}
 
-	mode := &serial.Mode {
-		BaudRate: BAUD
-	}
+	mode := &serial.Mode { BaudRate: BAUD }
 
-	sConn, err := serial.Open(PORT, mode)
+	sConn, err = serial.Open(PORT, mode)
 
 	if err != nil {
 		log_message(err.Error())
-		return
+		return false
 	}
 
 	log_message("Serial connection opened...")
+	return true
 }
 
 func initMockData() {
-	sta1 := Station{Vendor:"Apple", Mac:[6]byte{52,0,0,0,0,1}}
+	/*sta1 := Station{Vendor:"Apple", Mac:[6]byte{52,0,0,0,0,1}}
 	sta2 := Station{Vendor:"Apple", Mac:[6]byte{52,1,1,1,1,2}}
 	sta3 := Station{Vendor:"Apple", Mac:[6]byte{52,2,2,2,2,3}}
 	sta4 := Station{Vendor:"Apple", Mac:[6]byte{52,3,3,3,3,4}}
@@ -180,20 +191,23 @@ func initMockData() {
 	APL = append(APL, ap12);
 	APL = append(APL, ap13);
 	APL = append(APL, ap14);
-	APL = append(APL, ap15);
+	APL = append(APL, ap15);*/
 
-	readQueue = append(readQueue, `{"data_type": "packet", "pkt_type": "MGMT", "rssi": -30, "channel": 11, "addr1": "11:11:11:11", "addr2": "11:11:11:11", "addr3": "11:11:11:11"}`)
-	readQueue = append(readQueue, `{"data_type": "packet", "pkt_type": "MGMT", "rssi": -30, "channel": 11, "addr1": "11:11:11:11", "addr2": "11:11:11:11", "addr3": "11:11:11:11"}`)
-	readQueue = append(readQueue, `{"data_type": "packet", "pkt_type": "MGMT", "rssi": -30, "channel": 11, "addr1": "11:11:11:11", "addr2": "11:11:11:11", "addr3": "11:11:11:11"}`)
-	readQueue = append(readQueue, `{"data_type": "packet", "pkt_type": "MGMT", "rssi": -30, "channel": 11, "addr1": "11:11:11:11", "addr2": "11:11:11:11", "addr3": "11:11:11:11"}`)
-	readQueue = append(readQueue, `{"data_type": "packet", "pkt_type": "MGMT", "rssi": -30, "channel": 11, "addr1": "11:11:11:11", "addr2": "11:11:11:11", "addr3": "11:11:11:11"}`)
-	readQueue = append(readQueue, `{"data_type": "packet", "pkt_type": "MGMT", "rssi": -30, "channel": 11, "addr1": "11:11:11:11", "addr2": "11:11:11:11", "addr3": "11:11:11:11"}`)
-	readQueue = append(readQueue, `{"data_type": "packet", "pkt_type": "MGMT", "rssi": -30, "channel": 11, "addr1": "11:11:11:11", "addr2": "11:11:11:11", "addr3": "11:11:11:11"}`)
-	readQueue = append(readQueue, `{"data_type": "packet", "pkt_type": "MGMT", "rssi": -30, "channel": 11, "addr1": "11:11:11:11", "addr2": "11:11:11:11", "addr3": "11:11:11:11"}`)
-	readQueue = append(readQueue, `{"data_type": "packet", "pkt_type": "MGMT", "rssi": -30, "channel": 11, "addr1": "11:11:11:11", "addr2": "11:11:11:11", "addr3": "11:11:11:11"}`)
-	readQueue = append(readQueue, `{"data_type": "packet", "pkt_type": "MGMT", "rssi": -30, "channel": 11, "addr1": "11:11:11:11", "addr2": "11:11:11:11", "addr3": "11:11:11:11"}`)
-	readQueue = append(readQueue, `{"data_type": "packet", "pkt_type": "MGMT", "rssi": -30, "channel": 11, "addr1": "11:11:11:11", "addr2": "11:11:11:11", "addr3": "11:11:11:11"}`)
-	readQueue = append(readQueue, `{"data_type": "packet", "pkt_type": "MGMT", "rssi": -30, "channel": 11, "addr1": "11:11:11:11", "addr2": "11:11:11:11", "addr3": "11:11:11:11"}`)
+	readQueue = append(readQueue, `{"data_type": "accesspoint", "ssid": "Some Cool SSID 1", "enc": 2, "rssi": 10, "bssid":"11:11:11:11:11:11", "channel": 11, "hidden": false}`)
+	readQueue = append(readQueue, `{"data_type": "accesspoint", "ssid": "Some Cool SSID 2", "enc": 2, "rssi": 20, "bssid":"12:11:11:11:11:11", "channel": 11, "hidden": false}`)
+	readQueue = append(readQueue, `{"data_type": "accesspoint", "ssid": "Some Cool SSID 3", "enc": 2, "rssi": 40, "bssid":"13:11:11:11:11:11", "channel": 11, "hidden": false}`)
+	readQueue = append(readQueue, `{"data_type": "accesspoint", "ssid": "Some Cool SSID 4", "enc": 2, "rssi": 80, "bssid":"14:11:11:11:11:11", "channel": 11, "hidden": false}`)
+	readQueue = append(readQueue, `{"data_type": "accesspoint", "ssid": "Some Cool SSID 5", "enc": 2, "rssi": 100, "bssid":"15:11:11:11:11:11", "channel": 11, "hidden": false}`)
+
+	readQueue = append(readQueue, `{"data_type": "packet", "pkt_type": "MGMT", "rssi": 30, "channel": 11, "src": "11:11:11:11:11:11", "dst": "11:11:11:11:11:11", "bssid": "11:11:11:11:11:11", "ssid": "Some Cool SSID 1"}`)
+	readQueue = append(readQueue, `{"data_type": "packet", "pkt_type": "MGMT", "rssi": 30, "channel": 11, "src": "11:11:11:11:11:11", "dst": "12:11:11:11:11:11", "bssid": "12:11:11:11:11:11", "ssid": "Some Cool SSID 2"}`)
+	readQueue = append(readQueue, `{"data_type": "packet", "pkt_type": "MGMT", "rssi": 30, "channel": 11, "src": "11:11:11:11:11:11", "dst": "13:11:11:11:11:11", "bssid": "13:11:11:11:11:11", "ssid": "Some Cool SSID 3"}`)
+	readQueue = append(readQueue, `{"data_type": "packet", "pkt_type": "MGMT", "rssi": 30, "channel": 11, "src": "11:11:11:11:11:11", "dst": "14:11:11:11:11:11", "bssid": "14:11:11:11:11:11", "ssid": "Some Cool SSID 4"}`)
+	readQueue = append(readQueue, `{"data_type": "packet", "pkt_type": "MGMT", "rssi": 30, "channel": 11, "src": "11:11:11:11:11:11", "dst": "15:11:11:11:11:11", "bssid": "15:11:11:11:11:11", "ssid": "Some Cool SSID 5"}`)
+	readQueue = append(readQueue, `{"data_type": "packet", "pkt_type": "MGMT", "rssi": 30, "channel": 11, "src": "11:11:11:11:11:11", "dst": "14:11:11:11:11:11", "bssid": "14:11:11:11:11:11", "ssid": "Some Cool SSID 4"}`)
+	readQueue = append(readQueue, `{"data_type": "packet", "pkt_type": "MGMT", "rssi": 30, "channel": 11, "src": "11:11:11:11:11:11", "dst": "13:11:11:11:11:11", "bssid": "13:11:11:11:11:11", "ssid": "Some Cool SSID 3"}`)
+	readQueue = append(readQueue, `{"data_type": "packet", "pkt_type": "MGMT", "rssi": 30, "channel": 11, "src": "11:11:11:11:11:11", "dst": "12:11:11:11:11:11", "bssid": "12:11:11:11:11:11", "ssid": "Some Cool SSID 2"}`)
+	readQueue = append(readQueue, `{"data_type": "packet", "pkt_type": "MGMT", "rssi": 30, "channel": 11, "src": "11:11:11:11:11:11", "dst": "11:11:11:11:11:11", "bssid": "11:11:11:11:11:11", "ssid": "Some Cool SSID 1"}`)
 }
 
 func initRoutes() {
@@ -235,10 +249,106 @@ func getAccessPoints(w http.ResponseWriter, r *http.Request) {
 	//TODO Uncomment me for prod
 	//writeQueue = append(writeQueue, cmd)
 
-	re, _ := json.Marshal(APL)
+	re, _ := json.Marshal(AvailableAccesspoints)
 
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(re)
+}
+
+func handlerData() {
+	for {
+		if (len(readQueue) == 0) { 
+			time.Sleep(200)
+			continue; 
+		}
+
+		var buffer []byte = []byte(readQueue[0])
+		readQueue = readQueue[1:]
+		
+		bufferMap := make(map[string]interface{})
+		err := json.Unmarshal(buffer, &bufferMap)
+
+		if err != nil { 
+			log_message(err.Error())
+			continue
+		}
+
+		var datType string = fmt.Sprintf("%v", bufferMap["data_type"])
+
+		switch datType {
+			case "packet" :
+				packet := Packet{}
+
+				if err =  json.Unmarshal(buffer, &packet); err != nil {
+					log_message(err.Error())
+					break
+				}
+
+				packets = append(packets, packet)
+
+				if (packet.PktType != "MGMT") { 
+					break
+				}
+				
+				station := Station{}
+				//station.Vendor = vendorLookup(packet.Ssid)
+
+				var mac net.HardwareAddr
+
+				if packet.Src != packet.Bssid {
+					mac, err = net.ParseMAC(packet.Src)
+				} else if packet.Dst != packet.Bssid {
+					mac, err = net.ParseMAC(packet.Src)
+				}
+
+				if mac != nil {
+					station.Mac = []byte(mac)
+				}
+
+				if err != nil {
+					log_message(err.Error())
+					break
+				}
+
+				if _, ok := AvailableAccesspoints[packet.Bssid]; ok {
+					apMac, err := net.ParseMAC(packet.Bssid)
+					station.AP = []byte(apMac)
+
+					if err != nil {
+						log_message(err.Error())
+						break
+					}
+
+					Ap := AvailableAccesspoints[packet.Bssid]
+
+					Ap.Stations = append(Ap.Stations, station)
+					AvailableAccesspoints[packet.Bssid] = Ap
+				}
+
+				break
+			case "accesspoint" :
+				ap := AccessPoint{}
+
+				if err = json.Unmarshal(buffer, &ap); err != nil {
+					log_message(err.Error())
+					break
+				}
+
+				if val, ok := AvailableAccesspoints[ap.Bssid]; ok {
+					val.Rssi = ap.Rssi
+					val.Ssid = ap.Ssid
+					val.Channel = ap.Channel
+					val.Hidden = ap.Hidden
+				} else {
+					ap.Stations = []Station{}
+					AvailableAccesspoints[ap.Bssid] = ap
+				}
+
+				break
+			default :
+				break
+		}
+	}
 }
 
 func getPackets(w http.ResponseWriter, r *http.Request) {
@@ -361,7 +471,7 @@ func deauthAttack(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-/*
+/*``
 *	Pass a station and a deauth packet will be created to be sent to the station aswell as the 
 *	accesspoint. The created packet will be pushed to the writeQueue to be sent
 */
@@ -447,7 +557,7 @@ func ReadHandler() []byte {
 	var buf []byte
 	var ch []byte = make([]byte, 1)
 
-	n, err := sConn.Read(ch)
+	_, err := sConn.Read(ch)
 
 	if err != nil {
 		log_message(err.Error())
@@ -514,7 +624,7 @@ func log_message(message string) {
 		logs = logs[1:]
 	}
 
-	fmt.Println("[" + ft(time.Now()) + "] "  + message)
+	log.Print(message)
 	logs = append(logs, ("[" + ft(time.Now()) + "] "  + message))
 }
 
