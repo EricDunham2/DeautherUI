@@ -18,6 +18,10 @@ Vue.component('settings', {
                 interval: null,
                 channel: null,
                 hop: null
+            },
+            deauther: {
+                interval: null,
+                channel: null,
             }
         }
     },
@@ -35,6 +39,7 @@ Vue.component('settings', {
             this.accesspoint = result.data.accesspoint;
             this.apScanner = result.data.apScanner;
             this.packetScanner = result.data.packetScanner;
+            this.deauther = result.data.deauther;
 
             $(function () {
                 custom_input();
@@ -42,16 +47,22 @@ Vue.component('settings', {
         },
         saveConfig: function () {
             //Find a better way to force int
-            this.accesspoint.channel = parseInt(this.accesspoint.channel)
-            this.apScanner.channel = parseInt(this.apScanner.channel)
-            this.apScanner.interval = parseInt(this.apScanner.interval)
-            this.packetScanner.channel = parseInt(this.packetScanner.channel)
-            this.packetScanner.interval = parseInt(this.packetScanner.interval)
+            this.accesspoint.channel = parseInt(this.accesspoint.channel);
+
+            this.apScanner.channel = parseInt(this.apScanner.channel);
+            this.apScanner.interval = parseInt(this.apScanner.interval);
+
+            this.packetScanner.channel = parseInt(this.packetScanner.channel);
+            this.packetScanner.interval = parseInt(this.packetScanner.interval);
+
+            this.deauther.channel = parseInt(this.deauther.channel);
+            this.deauther.interval = parseInt(this.deauther.interval);
 
             var data = {
                 accesspoint: this.accesspoint,
                 apScanner: this.apScanner,
-                packetScanner: this.packetScanner
+                packetScanner: this.packetScanner,
+                deauther: this.deauther
             };
 
             axios
@@ -82,7 +93,7 @@ Vue.component('settings', {
                     </div>
                 </div>
             </div>
-            <div class="panel col-30 no-touch-top" style="vertical-align: top;">
+            <div class="panel col-50 no-touch-top" style="vertical-align: top;">
                 <div class="panel-header">Accesspoint</div>
                 <div class="panel-content">
                     <div class="input-group">
@@ -104,7 +115,7 @@ Vue.component('settings', {
                     </div>
                 </div>
             </div>
-            <div class="panel col-30 no-touch-top " style="vertical-align: top;">
+            <div class="panel col-50 no-touch-top " style="vertical-align: top;">
                 <div class="panel-header">Accesspoint Scanner</div>
                 <div class="panel-content">
                     <div class="input-group">
@@ -129,7 +140,7 @@ Vue.component('settings', {
                     </div>
                 </div>
             </div>
-            <div class="panel col-30 no-touch-top" style="vertical-align: top;">
+            <div class="panel col-50 no-touch-top" style="vertical-align: top;">
                 <div class="panel-header">Packet Scanner</div>
                 <div class="panel-content">
                     <div class="input-group">
@@ -139,11 +150,23 @@ Vue.component('settings', {
                     <div class="input-group">
                         <label for="channel" id="panel-label" class="dyn-input-label">Channel</label> 
                         <input type="number" placeholder="1-12" min="1" max="12" id="panel-input" name="channel" class="dyn-input" v-model="packetScanner.channel">
-                        <!--<i class="material-icons icon-xs" style="position: relative; color:#212121">visibility</i>-->
                     </div>
                     <div class="input-group">
                         <label for="hop" id="panel-label" class="dyn-input-label">Hop</label> 
                         <input type="text" placeholder="false/true" id="panel-input" name="hop" class="dyn-input" v-model="packetScanner.hop">
+                    </div>
+                </div>
+            </div>
+            <div class="panel col-50 no-touch-top" style="vertical-align: top;">
+                <div class="panel-header">Deauther</div>
+                <div class="panel-content">
+                    <div class="input-group">
+                        <label for="interval" id="panel-label" class="dyn-input-label">Interval</label> 
+                        <input placeholder="1000" type="text" id="panel-input" name="interval" class="dyn-input" v-model="deauther.interval">
+                    </div>
+                    <div class="input-group">
+                        <label for="channel" id="panel-label" class="dyn-input-label">Channel</label> 
+                        <input type="number" placeholder="1-12" min="1" max="12" id="panel-input" name="channel" class="dyn-input" v-model="deauther.channel">
                     </div>
                 </div>
             </div>

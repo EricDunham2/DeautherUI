@@ -7,19 +7,15 @@ import (
 	"net"
 	"go.bug.st/serial.v1"
 	"github.com/klauspost/oui"
-	//"os/exec"
 	"fmt"
 	"github.com/gobuffalo/packr"
 	"github.com/gorilla/mux"
 	"encoding/json"
 	"time"
-	//"strconv"
 	"io/ioutil"
 	"log"
-	//"reflect"
 )
 
-//const MacAddr [6]byte = [6]byte{0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF} //*Replace me with self address used for the Probe and Beacon Requests
 const BAUD int = 115200 //Read from a file
 const PORT string = "/dev/ttyAMA0"
 const MSG_START byte = 0x02 
@@ -45,6 +41,10 @@ type Settings struct {
 		Channel  int  `json:"channel"`
 		Hop      bool `json:"hop"`
 	} `json:"packetScanner"`
+	Deauther struct {
+		Interval int  `json:"interval"`
+		Channel  int  `json:"channel"`
+	} `json:"deauther"`
 }
 
 type AccessPoint struct {
@@ -79,7 +79,6 @@ type Station struct {
 var (
 	AvailableAccesspoints map[string]AccessPoint
 	router * mux.Router
-	//APL []AccessPoint //Depcrated, Remove .
 	writeQueue [][]byte
 	readQueue []string
 
@@ -122,7 +121,6 @@ func main() {
 	http.ListenAndServe(":8081", router)
 }
 
-
 func initSerial() bool{
 	log_message("Opening serial connection...")
 
@@ -152,45 +150,6 @@ func initSerial() bool{
 }
 
 func initMockData() {
-	/*sta1 := Station{Vendor:"Apple", Mac:[6]byte{52,0,0,0,0,1}}
-	sta2 := Station{Vendor:"Apple", Mac:[6]byte{52,1,1,1,1,2}}
-	sta3 := Station{Vendor:"Apple", Mac:[6]byte{52,2,2,2,2,3}}
-	sta4 := Station{Vendor:"Apple", Mac:[6]byte{52,3,3,3,3,4}}
-	sta5 := Station{Vendor:"Apple", Mac:[6]byte{52,4,4,4,4,5}}
-	sta6 := Station{Vendor:"Apple", Mac:[6]byte{52,5,5,5,5,6}}
-	sta7 := Station{Vendor:"Apple", Mac:[6]byte{52,6,6,6,6,7}}
-
-	ap1 := AccessPoint{Etype:"WEP", SSID:"Mock AP 1",RSSI: 70, Mac: [6]byte{52,234,200,167,201,78}, Stations: []Station{sta1, sta2, sta3, sta5}}
-	ap2 := AccessPoint{Etype:"WPA2-PSK", SSID:"Super long test 1", RSSI: 0, Mac: [6]byte{62,134,200,167,201,78}, Stations: []Station{sta1, sta2, sta3, sta5}}
-	ap3 := AccessPoint{Etype:"WPA2-PSK", SSID:"Super long test 2", RSSI: 70, Mac: [6]byte{72,124,200,167,201,78}, Stations: []Station{sta1, sta2, sta3, sta5}}
-	ap4 := AccessPoint{Etype:"WPA2-PSK", SSID:"Super long test 3", RSSI: 35, Mac: [6]byte{82,114,200,167,201,78}, Stations: []Station{sta1, sta2, sta3, sta5}}
-	ap5 := AccessPoint{Etype:"WPA2-PSK", SSID:"Super long test 4", RSSI: 47, Mac: [6]byte{92,104,200,167,201,78}}
-	ap6 := AccessPoint{Etype:"WPA2-PSK", SSID:"Super long test 5", RSSI: 100, Mac: [6]byte{102,94,200,167,201,78}}
-	ap7 := AccessPoint{Etype:"WPA2-PSK", SSID:"Super long test 6", RSSI: 89, Mac: [6]byte{112,84,200,167,201,78}}
-	ap8 := AccessPoint{Etype:"WPA2-PSK", SSID:"Super long test 7", RSSI: 11, Mac: [6]byte{122,74,200,167,201,78}, Stations: []Station{sta1, sta6, sta4, sta7}}
-	ap9 := AccessPoint{Etype:"WPA2-PSK", SSID:"Super long test 8", RSSI: 20, Mac: [6]byte{132,64,200,167,201,78}}
-	ap10 := AccessPoint{Etype:"WPA2-PSK", SSID:"Super long 9", RSSI: 19, Mac: [6]byte{52,234,200,167,201,78}}
-	ap11 := AccessPoint{Etype:"WPA2-PSK", SSID:"Super long 0", RSSI: 28, Mac: [6]byte{52,234,200,167,201,78}}
-	ap12 := AccessPoint{Etype:"WPA2-PSK", SSID:"Supe-t", RSSI: 77, Mac: [6]byte{52,234,200,167,201,78}}
-	ap13 := AccessPoint{Etype:"WPA2-PSK", SSID:"Super=", RSSI: 0, Mac: [6]byte{52,234,200,167,201,78}}
-	ap14 := AccessPoint{Etype:"WPA2-PSK", SSID:"Super=", RSSI: 2, Mac: [6]byte{52,234,200,167,201,78}}
-	ap15 := AccessPoint{Etype:"WPA2-PSK", SSID:"Super long test case name for test", RSSI: 70, Mac: [6]byte{52,234,200,167,201,78}}
-	APL = append(APL, ap1);
-	APL = append(APL, ap2);
-	APL = append(APL, ap3);
-	APL = append(APL, ap4);
-	APL = append(APL, ap5);
-	APL = append(APL, ap6);
-	APL = append(APL, ap7);
-	APL = append(APL, ap8);
-	APL = append(APL, ap9);
-	APL = append(APL, ap10);
-	APL = append(APL, ap11);
-	APL = append(APL, ap12);
-	APL = append(APL, ap13);
-	APL = append(APL, ap14);
-	APL = append(APL, ap15);*/
-
 	readQueue = append(readQueue, `{"data_type": "accesspoint", "ssid": "Some Cool SSID 1", "enc": 2, "rssi": 10, "bssid":"11:11:11:11:11:11", "channel": 11, "hidden": false}`)
 	readQueue = append(readQueue, `{"data_type": "accesspoint", "ssid": "Some Cool SSID 2", "enc": 2, "rssi": 20, "bssid":"12:11:11:11:11:11", "channel": 11, "hidden": false}`)
 	readQueue = append(readQueue, `{"data_type": "accesspoint", "ssid": "Some Cool SSID 3", "enc": 2, "rssi": 40, "bssid":"13:11:11:11:11:11", "channel": 11, "hidden": false}`)
@@ -243,7 +202,7 @@ func initRoutes() {
 
 func getAccessPoints(w http.ResponseWriter, r *http.Request) {
 	var cmd string = fmt.Sprintf("scan -async=%t -hidden=%t -channel=%d -hop=%t", settings.ApScanner.Async, settings.ApScanner.Deep, settings.ApScanner.Channel, settings.ApScanner.Hop)
-	log.Println(cmd)
+	log_message(cmd)
 	//TODO Uncomment me for prod
 	//writeQueue = append(writeQueue, cmd)
 
@@ -375,7 +334,7 @@ func getPackets(w http.ResponseWriter, r *http.Request) {
 func sniffPackets(w http.ResponseWriter, r *http.Request) {
 	var cmd string = fmt.Sprintf("sniff -interval=%d -channel=%d -hop=%t", settings.PacketScanner.Interval, settings.PacketScanner.Channel, settings.PacketScanner.Hop)
 
-	log.Println(cmd)
+	log_message(cmd)
 	//TODO Uncomment me for prod
 	//writeQueue = append(writeQueue, cmd)
 
@@ -387,7 +346,7 @@ func sniffPackets(w http.ResponseWriter, r *http.Request) {
 func startAccessPoint() {
 	var cmd string = fmt.Sprintf("setup  -ssid=%q -hidden=%t -channel=%d -password=%q", settings.AccessPointCfg.Ssid, settings.AccessPointCfg.Hidden, settings.AccessPointCfg.Channel, settings.AccessPointCfg.Passwd)
 	
-	log.Println(cmd)
+	log_message(cmd)
 	//TODO Uncomment me for prod
 	//writeQueue = append(writeQueue, cmd)
 
@@ -395,7 +354,6 @@ func startAccessPoint() {
 }
 
 func getConfig(w http.ResponseWriter, r *http.Request) {
-
 	if _, err := os.Stat(CONFIG_PATH); os.IsNotExist(err)  {
 		log_message("Config file does not exist...")
 		createConfig(`{"accesspoint":{"ssid":"Lambs to the Cosmic Slaughter","passwd":"Rick and Mortison","channel":12,"hidden":false},"apScanner":{"interval":1000,"deep":true,"async":false,"channel":12,"hop":false},"packetScanner":{"interval":1000, "channel": 12, "hop": false}}`)
@@ -445,8 +403,6 @@ func readConfig() []byte {
 
 	json.Unmarshal(dat, settings)
 
-	log.Println(settings)
-
 	return dat
 }
 
@@ -487,7 +443,7 @@ func deauthAttack(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-/*``
+/*
 *	Pass a station and a deauth packet will be created to be sent to the station aswell as the 
 *	accesspoint. The created packet will be pushed to the writeQueue to be sent
 */
@@ -515,32 +471,15 @@ func deauthStation(station Station) {
 		{0x01, 0x00},
 	}
 
-	//var toStation []byte
-	//var toAccesspoint []byte
-
-	//toStation = append(toStation, []byte(cmd)...)
-	//toAccesspoint = append(toAccesspoint, []byte(cmd)...)
-
-	//Create the deauth packet that will be sent to the station aswell as the accesspoint
-	//toStation = append(toStation, createPacket(ps)...)
-	//toAccesspoint = append(toStation, createPacket(pa)...)
-
-	//log_message(fmt.Sprintf("%#X", createPacket(ps)))
-	//log_message(fmt.Sprintf("%#X", createPacket(pa)))
-
-	//log_message(fmt.Sprintf("Deauthing %#X...", station.Mac))
-
-	//Add the packets to the queue to be sent
-
 	settingsDat := readConfig()
 	json.Unmarshal(settingsDat, &settings)
 
-	cmd := fmt.Sprintf("send -interval=%d -channel=%d -buffer=%s", 1000, 12, createPacket(pa))
-	log.Println(cmd)
+	cmd := fmt.Sprintf("send -interval=%d -channel=%d -buffer=%s", settings.Deauther.Interval, settings.Deauther.Channel, createPacket(pa))
+	log_message(cmd)
 	//writeQueue = append(writeQueue, []byte(cmd))
 
-	cmd = fmt.Sprintf("send -interval=%d -channel=%d -buffer=%s", 1000, 12, createPacket(ps))
-	log.Println(cmd)
+	cmd = fmt.Sprintf("send -interval=%d -channel=%d -buffer=%s", settings.Deauther.Interval, settings.Deauther.Channel, createPacket(ps))
+	log_message(cmd)
 
 	//writeQueue = append(writeQueue, []byte(cmd))
 }

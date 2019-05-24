@@ -131,7 +131,7 @@ Vue.component('attack', {
     <div class="col-100">
         <div class="flex-container col-100" id="content">
             <div class="flex-container col-100 no-touch-top" style="overflow:none;">
-                <div class="panel-content vhc" v-if="isAttacking || !accesspoints" style="height:110vh; background: rgba(21,21,21,.7); position:absolute;">
+                <div class="panel-content vhc" v-if="isAttacking || !accesspoints" style="height: 110vh;background: rgba(21, 21, 21, 0.7);position: fixed; top: 0px !important;">
                     <div>
                         <div class="row clearfix">
                             <div class="square one"></div> 
