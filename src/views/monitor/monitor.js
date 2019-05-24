@@ -13,14 +13,11 @@ Vue.component('monitor', {
         _setPackets: function(response) {
             if (!response.data) { return; }
             this.packets = [];
-            
+
+            console.log(response.data);
+
             response.data.forEach(pkt => {
-                try {
-                    this.packets.push(JSON.parse(pkt));
-                } catch (err) {
-                    console.error(err);
-                    console.error(`Failed to parse packet ${pkt}`);
-                }
+                this.packets.push(pkt);          
             });
         }
     },
@@ -51,11 +48,11 @@ Vue.component('monitor', {
                 <!--<div class="col-5 vhc"></div>-->
                 <div class="col-30 vhc" style="flex-grow:1;">
                     <div class="card-row-header">Source:</div>
-                    <div v-text="packet.addr1"></div>
+                    <div v-text="packet.src"></div>
                 </div>
                 <div class="col-30 vhc" style="flex-grow:1;">
                     <div class="card-row-header">Destination:</div>
-                    <div v-text="packet.addr2"></div>
+                    <div v-text="packet.dst"></div>
                 </div>
                 <div class="col-5 vhc" style="flex-grow:1;">
                     <div class="card-row-header">RSSI:</div>
@@ -70,8 +67,8 @@ Vue.component('monitor', {
                     <div v-text="packet.pkt_type"></div>
                 </div>
                 <div class="col-5 vhc" style="flex-grow:1;">
-                    <div class="card-row-header">Type:</div>
-                    <div v-text="packet.pkt_type"></div>
+                    <div class="card-row-header">Vendor:</div>
+                    <div v-text="packet.vendor"></div>
                 </div>
             </div>
         </div>

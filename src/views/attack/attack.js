@@ -131,7 +131,7 @@ Vue.component('attack', {
     <div class="col-100">
         <div class="flex-container col-100" id="content">
             <div class="flex-container col-100 no-touch-top" style="overflow:none;">
-                <div class="panel-content vhc" v-if="isAttacking" style="height:110vh; background: rgba(21,21,21,.7); position:absolute;">
+                <div class="panel-content vhc" v-if="isAttacking || !accesspoints" style="height:110vh; background: rgba(21,21,21,.7); position:absolute;">
                     <div>
                         <div class="row clearfix">
                             <div class="square one"></div> 
@@ -182,7 +182,7 @@ Vue.component('attack', {
                                             <img v-else-if="ap.rssi >= 75 && ap.rssi <= 100" class="icon-md" src="/static/images/wifi_4_grey.png">	
                                         </div>
                                         <div class="panel-footer vhc">
-                                            <div v-text="ap.fmtMac"></div>
+                                            <div v-text="ap.bssid"></div>
                                         </div>
                                     </div>
                                 </template>
@@ -204,13 +204,13 @@ Vue.component('attack', {
                                         v-if="!sta.selected"
                                     >
                                         <div class="panel-header vhc">
-                                            <div v-text="sta.vendor"></div>
+                                            <div v-text="sta.fmtMac"></div>
                                         </div>
                                         <div class="panel-content vhc">
                                             <i class="material-icons icon-md vhc">devices</i>
                                         </div>
                                         <div class="panel-footer vhc">
-                                            <div v-text="sta.fmtMac"></div>
+                                            <div v-text="sta.vendor"></div>
                                         </div>
                                     </div>
                                 </template>
@@ -223,13 +223,13 @@ Vue.component('attack', {
                                 v-on:mouseover="onTileHover(sta)" v-on:mouseout="offTileHover()">
                                     <div class="panel col-100">
                                         <div class="panel-header vhc">
-                                            <div v-text="sta.vendor"></div>
+                                            <div v-text="sta.fmtMac"></div>
                                         </div>
                                         <div class="panel-content vhc">
                                             <i class="material-icons icon-md vhc">devices</i>
                                         </div>
                                         <div class="panel-footer vhc">
-                                            <div v-text="sta.fmtMac"></div>
+                                            <div v-text="sta.vendor"></div>
                                         </div>
                                     </div>
                                 </div>

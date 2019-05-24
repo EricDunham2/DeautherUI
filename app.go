@@ -6,6 +6,7 @@ import (
 	"os"
 	"net"
 	"go.bug.st/serial.v1"
+	"github.com/klauspost/oui"
 	//"os/exec"
 	"fmt"
 	"github.com/gobuffalo/packr"
@@ -26,24 +27,30 @@ const MSG_END byte = 0x03
 const CONFIG_PATH string = "./src/static/configs/config.json"
 
 type Settings struct {
-	Ap struct {
-		Ssid    string `json:"ssid"`
-		Passwd  string `json:"passwd"`
-		Channel int    `json:"channel"`
-		Hidden  bool   `json:"hidden"`
-	} `json:"accesspoint"`
-	ApScanner struct {
-		Interval int  `json:"interval"`
-		Deep     bool `json:"deep"`
-		Async    bool `json:"async"`
-		Channel  int  `json:"channel"`
-		Hop      bool `json:"hop"`
-	} `json:"apScanner"`
-	PktScanner struct {
-		Interval int  `json:"interval"`
-		Channel  int  `json:"channel"`
-		Hop      bool `json:"hop"`
-	} `json:"packetScanner"`
+	AccessPointCfg 	AccessPointCfg 	`json:"accesspoint"`
+	ApScanner 		ApScanner 		`json:"apScanner"`
+	PacketScanner 	PacketScanner	`json:"packetScanner"`
+}
+
+type AccessPointCfg struct {
+	Ssid    string `json:"ssid"`
+	Passwd  string `json:"passwd"`
+	Channel int    `json:"channel"`
+	Hidden  bool   `json:"hidden"`
+}
+
+type ApScanner struct {
+	Interval int  `json:"interval"`
+	Deep     bool `json:"deep"`
+	Async    bool `json:"async"`
+	Channel  int  `json:"channel"`
+	Hop      bool `json:"hop"`
+}
+
+type PacketScanner struct {
+	Interval int  `json:"interval"`
+	Channel  int  `json:"channel"`
+	Hop      bool `json:"hop"`
 }
 
 /*type AccessPoint struct {
@@ -73,15 +80,15 @@ type Packet struct {
 	Dst      	string `json:"dst"`
 	Bssid    	string `json:"bssid"`
 	Ssid     	string `json:"ssid"`
+	Vendor		string `json:"vendor"`
 }
 
 type Station struct {
 	Name 	string 	`json:"name"`
 	Vendor 	string 	`json:"vendor"`
 	Mac 	[]byte	`json:"mac"`
-	MacStr  string 	`json:"macStr"`
+	FmtMac  string 	`json:"fmtMac"`
 	AP 		[]byte 	`json:"ap"`
-	APStr	string 	`json:"apStr"`
 }
 
 var (
@@ -96,21 +103,25 @@ var (
 	sConn serial.Port
 	sniffing bool
 	settings Settings
+	db oui.StaticDB
 )
 
 func main() {
-	router = mux.NewRouter()
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
 
+	router = mux.NewRouter()
 	sniffing = false
 
-	//channel = 11
-	//log_message(fmt.Sprintf("Default channel set to %d...", channel))
+	var err error
+	db, err = oui.OpenStaticFile("./src/static/configs/oui.txt")
 
-	settingsDat := readConfig()
+	if err != nil { 
+		log_message(err.Error())
+	}
+
 	AvailableAccesspoints = make(map[string]AccessPoint)
-	json.Unmarshal(settingsDat, &settings)
-	log_message(fmt.Sprintf("Default settings set to %s...", settings))
+
+	readConfig()
 
 	initRoutes()
 	initMockData()
@@ -199,7 +210,7 @@ func initMockData() {
 	readQueue = append(readQueue, `{"data_type": "accesspoint", "ssid": "Some Cool SSID 4", "enc": 2, "rssi": 80, "bssid":"14:11:11:11:11:11", "channel": 11, "hidden": false}`)
 	readQueue = append(readQueue, `{"data_type": "accesspoint", "ssid": "Some Cool SSID 5", "enc": 2, "rssi": 100, "bssid":"15:11:11:11:11:11", "channel": 11, "hidden": false}`)
 
-	readQueue = append(readQueue, `{"data_type": "packet", "pkt_type": "MGMT", "rssi": 30, "channel": 11, "src": "11:11:11:11:11:11", "dst": "11:11:11:11:11:11", "bssid": "11:11:11:11:11:11", "ssid": "Some Cool SSID 1"}`)
+	readQueue = append(readQueue, `{"data_type": "packet", "pkt_type": "MGMT", "rssi": 30, "channel": 11, "src": "11:11:11:11:11:11", "dst": "13:11:11:11:11:11", "bssid": "13:11:11:11:11:11", "ssid": "Some Cool SSID 1"}`)
 	readQueue = append(readQueue, `{"data_type": "packet", "pkt_type": "MGMT", "rssi": 30, "channel": 11, "src": "11:11:11:11:11:11", "dst": "12:11:11:11:11:11", "bssid": "12:11:11:11:11:11", "ssid": "Some Cool SSID 2"}`)
 	readQueue = append(readQueue, `{"data_type": "packet", "pkt_type": "MGMT", "rssi": 30, "channel": 11, "src": "11:11:11:11:11:11", "dst": "13:11:11:11:11:11", "bssid": "13:11:11:11:11:11", "ssid": "Some Cool SSID 3"}`)
 	readQueue = append(readQueue, `{"data_type": "packet", "pkt_type": "MGMT", "rssi": 30, "channel": 11, "src": "11:11:11:11:11:11", "dst": "14:11:11:11:11:11", "bssid": "14:11:11:11:11:11", "ssid": "Some Cool SSID 4"}`)
@@ -244,7 +255,11 @@ func initRoutes() {
 }
 
 func getAccessPoints(w http.ResponseWriter, r *http.Request) {
-	var cmd string = fmt.Sprintf("scan -async=%t -hidden=%t -channel=%d -hop=%t", settings.ApScanner.Async, settings.ApScanner.Deep, settings.ApScanner.Channel, settings.ApScanner.Hop)
+	readConfig()
+
+	fmt.Println(settings.ApScanner)
+
+	var cmd string = fmt.Sprintf("scan -async=%t -hidden=%t -channel=%d -hop=%t", &settings.ApScanner.Async, settings.ApScanner.Deep, settings.ApScanner.Channel, settings.ApScanner.Hop)
 	fmt.Println(cmd)
 	//TODO Uncomment me for prod
 	//writeQueue = append(writeQueue, cmd)
@@ -284,15 +299,6 @@ func handlerData() {
 					break
 				}
 
-				packets = append(packets, packet)
-
-				if (packet.PktType != "MGMT") { 
-					break
-				}
-				
-				station := Station{}
-				//station.Vendor = vendorLookup(packet.Ssid)
-
 				var mac net.HardwareAddr
 
 				if packet.Src != packet.Bssid {
@@ -301,8 +307,32 @@ func handlerData() {
 					mac, err = net.ParseMAC(packet.Src)
 				}
 
+				if db != nil {
+					macb := []byte(mac)
+
+					if len(macb) == 6 {
+						entry, err := db.Query(fmt.Sprintf("%X:%X:%X:%X:%X:%X", macb[0], macb[1], macb[2], macb[3], macb[4], macb[5]))
+
+						if err != nil {
+							log_message(err.Error())
+							break
+						}
+						
+						packet.Vendor = entry.Manufacturer
+					}
+				}
+
+				packets = append(packets, packet)
+
+				if (packet.PktType != "MGMT") { 
+					break
+				}
+
+				station := Station{}
+
 				if mac != nil {
 					station.Mac = []byte(mac)
+					station.FmtMac = fmt.Sprintf("%X:%X:%X:%X:%X:%X", mac[0], mac[1], mac[2], mac[3], mac[4], mac[5])
 				}
 
 				if err != nil {
@@ -313,6 +343,7 @@ func handlerData() {
 				if _, ok := AvailableAccesspoints[packet.Bssid]; ok {
 					apMac, err := net.ParseMAC(packet.Bssid)
 					station.AP = []byte(apMac)
+					station.Vendor = packet.Vendor
 
 					if err != nil {
 						log_message(err.Error())
@@ -352,14 +383,16 @@ func handlerData() {
 }
 
 func getPackets(w http.ResponseWriter, r *http.Request) {
-	re, _ := json.Marshal(readQueue)
+	re, _ := json.Marshal(packets)
 
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(re)
 }
 
 func sniffPackets(w http.ResponseWriter, r *http.Request) {
-	var cmd string = fmt.Sprintf("sniff -interval=%d -channel=%d -hop=%t", settings.PktScanner.Interval, settings.PktScanner.Channel, settings.PktScanner.Hop)
+	readConfig()
+
+	var cmd string = fmt.Sprintf("sniff -interval=%d -channel=%d -hop=%t", settings.PacketScanner.Interval, settings.PacketScanner.Channel, settings.PacketScanner.Hop)
 
 	fmt.Println(cmd)
 	//TODO Uncomment me for prod
@@ -371,7 +404,7 @@ func sniffPackets(w http.ResponseWriter, r *http.Request) {
 }
 
 func startAccessPoint() {
-	var cmd string = fmt.Sprintf("setup  -ssid=%q -hidden=%t -channel=%d -password=%q", settings.Ap.Ssid, settings.Ap.Hidden, settings.Ap.Channel, settings.Ap.Passwd)
+	var cmd string = fmt.Sprintf("setup  -ssid=%q -hidden=%t -channel=%d -password=%q", settings.AccessPointCfg.Ssid, settings.AccessPointCfg.Hidden, settings.AccessPointCfg.Channel, settings.AccessPointCfg.Passwd)
 	
 	fmt.Println(cmd)
 	//TODO Uncomment me for prod
@@ -429,7 +462,20 @@ func readConfig() []byte {
 		return []byte{};
 	}
 
-	json.Unmarshal(dat, &settings)
+	bufferMap := make(map[string]interface{})
+	json.Unmarshal(dat, &bufferMap)
+
+	/*var apc AccessPointCfg
+	//var aps ApScanner
+	//var ps PacketScanner
+
+	fmt.Println()
+	byt, _ := json.Marshal(bufferMap["accesspoint"])
+	json.Unmarshal(byt, &apc)
+
+	fmt.Println(apc)*/
+
+
 
 	return dat
 }
@@ -479,6 +525,8 @@ func deauthAttack(w http.ResponseWriter, r *http.Request) {
 func deauthStation(station Station) {
 	//cmd := "send -interval=%d -channel=%d -buffer=%s"
 
+	fmt.Println(fmt.Sprintf("%X:%X:%X:%X:%X:%X", station.Mac[0], station.Mac[1], station.Mac[2], station.Mac[3], station.Mac[4], station.Mac[5]))
+
 	var pa [][]byte = [][]byte{
 		{0xC0, 0x00}, // Type, Subtype
 		{0x00, 0x00}, // Duration
@@ -515,6 +563,10 @@ func deauthStation(station Station) {
 	//log_message(fmt.Sprintf("Deauthing %#X...", station.Mac))
 
 	//Add the packets to the queue to be sent
+
+	settingsDat := readConfig()
+	json.Unmarshal(settingsDat, &settings)
+
 	cmd := fmt.Sprintf("send -interval=%d -channel=%d -buffer=%s", 1000, 12, createPacket(pa))
 	fmt.Println(cmd)
 	//writeQueue = append(writeQueue, []byte(cmd))
