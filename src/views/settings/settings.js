@@ -41,6 +41,13 @@ Vue.component('settings', {
             });
         },
         saveConfig: function () {
+            //Find a better way to force int
+            this.accesspoint.channel = parseInt(this.accesspoint.channel)
+            this.apScanner.channel = parseInt(this.apScanner.channel)
+            this.apScanner.interval = parseInt(this.apScanner.interval)
+            this.packetScanner.channel = parseInt(this.packetScanner.channel)
+            this.packetScanner.interval = parseInt(this.packetScanner.interval)
+
             var data = {
                 accesspoint: this.accesspoint,
                 apScanner: this.apScanner,
@@ -89,7 +96,7 @@ Vue.component('settings', {
                     </div>
                     <div class="input-group">
                         <label for="channel" id="panel-label" class="dyn-input-label">Channel</label> 
-                        <input type="text" placeholder="1-12" id="panel-input" name="channel" class="dyn-input" v-model="accesspoint.channel">
+                        <input type="number" placeholder="1-12" id="panel-input" name="channel" class="dyn-input" v-model="accesspoint.channel">
                     </div>
                     <div class="input-group">
                         <label for="hidden" id="panel-label" class="dyn-input-label">Hidden</label> 
@@ -114,7 +121,7 @@ Vue.component('settings', {
                     </div>
                     <div class="input-group">
                         <label for="channel" id="panel-label" class="dyn-input-label">Channel</label> 
-                        <input type="text" placeholder="1-12" id="panel-input" name="channel" class="dyn-input" v-model="apScanner.channel">
+                        <input type="number" placeholder="1-12" id="panel-input" name="channel" class="dyn-input" v-model="apScanner.channel">
                     </div>
                     <div class="input-group">
                         <label for="hop" id="panel-label" class="dyn-input-label">Hop</label> 
@@ -131,7 +138,7 @@ Vue.component('settings', {
                     </div>
                     <div class="input-group">
                         <label for="channel" id="panel-label" class="dyn-input-label">Channel</label> 
-                        <input type="text" placeholder="1-12" min="1" max="12" id="panel-input" name="channel" class="dyn-input" v-model="packetScanner.channel">
+                        <input type="number" placeholder="1-12" min="1" max="12" id="panel-input" name="channel" class="dyn-input" v-model="packetScanner.channel">
                         <!--<i class="material-icons icon-xs" style="position: relative; color:#212121">visibility</i>-->
                     </div>
                     <div class="input-group">

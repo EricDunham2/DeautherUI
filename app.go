@@ -27,40 +27,25 @@ const MSG_END byte = 0x03
 const CONFIG_PATH string = "./src/static/configs/config.json"
 
 type Settings struct {
-	AccessPointCfg 	AccessPointCfg 	`json:"accesspoint"`
-	ApScanner 		ApScanner 		`json:"apScanner"`
-	PacketScanner 	PacketScanner	`json:"packetScanner"`
+	AccessPointCfg struct {
+		Ssid    string `json:"ssid"`
+		Passwd  string `json:"passwd"`
+		Channel int    `json:"channel"`
+		Hidden  bool   `json:"hidden"`
+	} `json:"accesspoint"`
+	ApScanner struct {
+		Interval int  `json:"interval"`
+		Deep     bool `json:"deep"`
+		Async    bool `json:"async"`
+		Channel  int  `json:"channel"`
+		Hop      bool `json:"hop"`
+	} `json:"apScanner"`
+	PacketScanner struct {
+		Interval int  `json:"interval"`
+		Channel  int  `json:"channel"`
+		Hop      bool `json:"hop"`
+	} `json:"packetScanner"`
 }
-
-type AccessPointCfg struct {
-	Ssid    string `json:"ssid"`
-	Passwd  string `json:"passwd"`
-	Channel int    `json:"channel"`
-	Hidden  bool   `json:"hidden"`
-}
-
-type ApScanner struct {
-	Interval int  `json:"interval"`
-	Deep     bool `json:"deep"`
-	Async    bool `json:"async"`
-	Channel  int  `json:"channel"`
-	Hop      bool `json:"hop"`
-}
-
-type PacketScanner struct {
-	Interval int  `json:"interval"`
-	Channel  int  `json:"channel"`
-	Hop      bool `json:"hop"`
-}
-
-/*type AccessPoint struct {
-	Ecn int //`json:"ecn"`
-	Etype string //`json:"etype"`
-	SSID string //`json:"ssid"`
-	RSSI int //`json:"rssi"`
-	Mac [6]byte //`json:"mac"`
-	Stations []Station //`json:"stations"`
-}*/
 
 type AccessPoint struct {
 	Ssid     string    	`json:"ssid"`
@@ -102,12 +87,14 @@ var (
 	logs []string
 	sConn serial.Port
 	sniffing bool
-	settings Settings
+	settings *Settings
 	db oui.StaticDB
 )
 
 func main() {
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
+
+	settings = &Settings{}
 
 	router = mux.NewRouter()
 	sniffing = false
@@ -244,7 +231,7 @@ func initRoutes() {
 		i, err := template.New("").ParseFiles(tmpl...)
 
 		if err != nil {
-			fmt.Println(err)
+			log_message(err.Error())
 			return; 
 		}
 
@@ -255,12 +242,8 @@ func initRoutes() {
 }
 
 func getAccessPoints(w http.ResponseWriter, r *http.Request) {
-	readConfig()
-
-	fmt.Println(settings.ApScanner)
-
-	var cmd string = fmt.Sprintf("scan -async=%t -hidden=%t -channel=%d -hop=%t", &settings.ApScanner.Async, settings.ApScanner.Deep, settings.ApScanner.Channel, settings.ApScanner.Hop)
-	fmt.Println(cmd)
+	var cmd string = fmt.Sprintf("scan -async=%t -hidden=%t -channel=%d -hop=%t", settings.ApScanner.Async, settings.ApScanner.Deep, settings.ApScanner.Channel, settings.ApScanner.Hop)
+	log.Println(cmd)
 	//TODO Uncomment me for prod
 	//writeQueue = append(writeQueue, cmd)
 
@@ -390,11 +373,9 @@ func getPackets(w http.ResponseWriter, r *http.Request) {
 }
 
 func sniffPackets(w http.ResponseWriter, r *http.Request) {
-	readConfig()
-
 	var cmd string = fmt.Sprintf("sniff -interval=%d -channel=%d -hop=%t", settings.PacketScanner.Interval, settings.PacketScanner.Channel, settings.PacketScanner.Hop)
 
-	fmt.Println(cmd)
+	log.Println(cmd)
 	//TODO Uncomment me for prod
 	//writeQueue = append(writeQueue, cmd)
 
@@ -406,7 +387,7 @@ func sniffPackets(w http.ResponseWriter, r *http.Request) {
 func startAccessPoint() {
 	var cmd string = fmt.Sprintf("setup  -ssid=%q -hidden=%t -channel=%d -password=%q", settings.AccessPointCfg.Ssid, settings.AccessPointCfg.Hidden, settings.AccessPointCfg.Channel, settings.AccessPointCfg.Passwd)
 	
-	fmt.Println(cmd)
+	log.Println(cmd)
 	//TODO Uncomment me for prod
 	//writeQueue = append(writeQueue, cmd)
 
@@ -462,20 +443,9 @@ func readConfig() []byte {
 		return []byte{};
 	}
 
-	bufferMap := make(map[string]interface{})
-	json.Unmarshal(dat, &bufferMap)
+	json.Unmarshal(dat, settings)
 
-	/*var apc AccessPointCfg
-	//var aps ApScanner
-	//var ps PacketScanner
-
-	fmt.Println()
-	byt, _ := json.Marshal(bufferMap["accesspoint"])
-	json.Unmarshal(byt, &apc)
-
-	fmt.Println(apc)*/
-
-
+	log.Println(settings)
 
 	return dat
 }
@@ -523,9 +493,7 @@ func deauthAttack(w http.ResponseWriter, r *http.Request) {
 */
 
 func deauthStation(station Station) {
-	//cmd := "send -interval=%d -channel=%d -buffer=%s"
-
-	fmt.Println(fmt.Sprintf("%X:%X:%X:%X:%X:%X", station.Mac[0], station.Mac[1], station.Mac[2], station.Mac[3], station.Mac[4], station.Mac[5]))
+	log.Println(fmt.Sprintf("%X:%X:%X:%X:%X:%X", station.Mac[0], station.Mac[1], station.Mac[2], station.Mac[3], station.Mac[4], station.Mac[5]))
 
 	var pa [][]byte = [][]byte{
 		{0xC0, 0x00}, // Type, Subtype
@@ -568,11 +536,11 @@ func deauthStation(station Station) {
 	json.Unmarshal(settingsDat, &settings)
 
 	cmd := fmt.Sprintf("send -interval=%d -channel=%d -buffer=%s", 1000, 12, createPacket(pa))
-	fmt.Println(cmd)
+	log.Println(cmd)
 	//writeQueue = append(writeQueue, []byte(cmd))
 
 	cmd = fmt.Sprintf("send -interval=%d -channel=%d -buffer=%s", 1000, 12, createPacket(ps))
-	fmt.Println(cmd)
+	log.Println(cmd)
 
 	//writeQueue = append(writeQueue, []byte(cmd))
 }
