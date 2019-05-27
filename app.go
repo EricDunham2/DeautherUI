@@ -204,7 +204,7 @@ func getAccessPoints(w http.ResponseWriter, r *http.Request) {
 	var cmd string = fmt.Sprintf("scan -async=%t -hidden=%t -channel=%d -hop=%t", settings.ApScanner.Async, settings.ApScanner.Deep, settings.ApScanner.Channel, settings.ApScanner.Hop)
 	log_message(cmd)
 	//TODO Uncomment me for prod
-	//writeQueue = append(writeQueue, cmd)
+	writeQueue = append(writeQueue, []byte(cmd))
 
 	re, _ := json.Marshal(AvailableAccesspoints)
 
@@ -336,7 +336,7 @@ func sniffPackets(w http.ResponseWriter, r *http.Request) {
 
 	log_message(cmd)
 	//TODO Uncomment me for prod
-	//writeQueue = append(writeQueue, cmd)
+	writeQueue = append(writeQueue, []byte(cmd))
 
 	log_message("Sniffing packets")
 
@@ -347,8 +347,8 @@ func startAccessPoint() {
 	var cmd string = fmt.Sprintf("setup  -ssid=%q -hidden=%t -channel=%d -password=%q", settings.AccessPointCfg.Ssid, settings.AccessPointCfg.Hidden, settings.AccessPointCfg.Channel, settings.AccessPointCfg.Passwd)
 	
 	log_message(cmd)
-	//TODO Uncomment me for prod
-	//writeQueue = append(writeQueue, cmd)
+
+	writeQueue = append(writeQueue, []byte(cmd))
 
 	log_message("Starting accesspoint packets")
 }
@@ -476,12 +476,12 @@ func deauthStation(station Station) {
 
 	cmd := fmt.Sprintf("send -interval=%d -channel=%d -buffer=%s", settings.Deauther.Interval, settings.Deauther.Channel, createPacket(pa))
 	log_message(cmd)
-	//writeQueue = append(writeQueue, []byte(cmd))
+	writeQueue = append(writeQueue, []byte(cmd))
 
 	cmd = fmt.Sprintf("send -interval=%d -channel=%d -buffer=%s", settings.Deauther.Interval, settings.Deauther.Channel, createPacket(ps))
 	log_message(cmd)
 
-	//writeQueue = append(writeQueue, []byte(cmd))
+	writeQueue = append(writeQueue, []byte(cmd))
 }
 
 /*
@@ -503,12 +503,16 @@ func WriteHandler(data []byte) {
 	if data == nil { return }
 	
 	data = append(data, 0x0A);
-	//!Uncomment me
-	/*n, err := sConn.Write(data)
 
-	if err != nil {
-		log_message(err.Error())
-	}*/
+	if (sConn != nil) {
+		log_message(fmt.Sprintf("Writing: %s", data))
+
+		_, err := sConn.Write(data)
+		
+		if err != nil {
+			log_message(err.Error())
+		}
+	}
 }
 
 func ReadHandler() []byte {
@@ -522,6 +526,8 @@ func ReadHandler() []byte {
 		log_message(err.Error())
 		return nil
 	}
+
+	log_message(fmt.Sprintf("Reading: %s", ch))
 
 	for ch[0] != MSG_END {
 		if !building && len(writeQueue) > 0 { return []byte{} }
@@ -546,6 +552,9 @@ func ReadHandler() []byte {
 
 func ActionHandler() {
 	for true {
+		
+		fmt.Println(len(writeQueue))
+
 		if len(writeQueue) > 0 {
 			data := writeQueue[0]
 

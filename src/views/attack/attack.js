@@ -165,7 +165,7 @@ Vue.component('attack', {
                             <div class="panel-content col-90 hc" id="targetList" style="overflow:auto; height:calc(100% - 75px)">
                                 <template v-if="!selectedAccesspoint">
                                     <div
-                                        class="ap-information-panel__large l5 clickable no-touch-table panel"
+                                        class="ap-information-panel__medium l5 clickable no-touch-table panel"
                                         v-on:click="setSelectedAccesspoint(ap)"
                                         v-on:mouseover="onTileHover(ap)"
                                         v-on:mouseout="offTileHover()"
@@ -240,7 +240,7 @@ Vue.component('attack', {
             </div>
             <div class="footer l2 vhc" style="position:fixed; bottom:0; height:max-content;">
                 <div class="vhc col-100">
-                    <div class="vhc" style="width:100%;">
+                    <div class="vhc" style="width:150px;">
                         <input id="deauth" type="checkbox" role="button" class="toggle-btn" v-model="isAttacking" @click="toggleAttack()"/>
                         <label for="deauth" class="toggle-lbl vh-center" style="width:100%; margin:0;" ><span class="v-center" style="text-transform: uppercase;">Start</span></label>
                     </div>
