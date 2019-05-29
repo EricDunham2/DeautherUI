@@ -1,11 +1,14 @@
 package main
 
 import (
+	"os/signal"
+	"syscall"
 	"html/template"
 	"net/http"
 	"os"
 	"net"
-	"go.bug.st/serial.v1"
+	"github.com/tarm/serial"
+	//"go.bug.st/serial.v1"
 	"github.com/klauspost/oui"
 	"fmt"
 	"github.com/gobuffalo/packr"
@@ -84,10 +87,10 @@ var (
 
 	packets []Packet
 	logs []string
-	sConn serial.Port
-	sniffing bool
+	sConn *serial.Port
 	settings *Settings
 	db oui.StaticDB
+
 )
 
 func main() {
@@ -96,7 +99,6 @@ func main() {
 	settings = &Settings{}
 
 	router = mux.NewRouter()
-	sniffing = false
 
 	var err error
 	db, err = oui.OpenStaticFile("./src/static/configs/oui.txt")
@@ -108,23 +110,21 @@ func main() {
 	AvailableAccesspoints = make(map[string]AccessPoint)
 
 	readConfig()
-
 	initRoutes()
-	initMockData()
 
 	if initSerial() {
 		go ActionHandler();
+	} else {
+		initMockData()
 	}
 
-	go handlerData();
-
-	http.ListenAndServe(":8081", router)
+	http.ListenAndServe(":3000", router)
 }
 
 func initSerial() bool{
 	log_message("Opening serial connection...")
 
-	ports, err := serial.GetPortsList()
+	/*ports, err := serial.GetPortsList()
 
 	if err != nil {
 		log_message(err.Error())
@@ -134,11 +134,11 @@ func initSerial() bool{
 	if len(ports) == 0 {
 		log_message("No serial ports were found...")
 		return false
-	}
+	}*/
+	var err error
 
-	mode := &serial.Mode { BaudRate: BAUD }
-
-	sConn, err = serial.Open(PORT, mode)
+	mode := &serial.Config{Name: PORT, Baud: BAUD, ReadTimeout: time.Millisecond * 200 }
+	sConn, err = serial.OpenPort(mode)
 
 	if err != nil {
 		log_message(err.Error())
@@ -165,6 +165,7 @@ func initMockData() {
 	readQueue = append(readQueue, `{"data_type": "packet", "pkt_type": "MGMT", "rssi": 30, "channel": 11, "src": "11:11:11:11:11:11", "dst": "13:11:11:11:11:11", "bssid": "13:11:11:11:11:11", "ssid": "Some Cool SSID 3"}`)
 	readQueue = append(readQueue, `{"data_type": "packet", "pkt_type": "MGMT", "rssi": 30, "channel": 11, "src": "11:11:11:11:11:11", "dst": "12:11:11:11:11:11", "bssid": "12:11:11:11:11:11", "ssid": "Some Cool SSID 2"}`)
 	readQueue = append(readQueue, `{"data_type": "packet", "pkt_type": "MGMT", "rssi": 30, "channel": 11, "src": "11:11:11:11:11:11", "dst": "11:11:11:11:11:11", "bssid": "11:11:11:11:11:11", "ssid": "Some Cool SSID 1"}`)
+	go DataHandler();
 }
 
 func initRoutes() {
@@ -212,7 +213,7 @@ func getAccessPoints(w http.ResponseWriter, r *http.Request) {
 	w.Write(re)
 }
 
-func handlerData() {
+func DataHandler() {
 	for {
 		if (len(readQueue) == 0) { 
 			time.Sleep(200)
@@ -499,62 +500,84 @@ func createPacket(parts [][]byte) []byte {
 	return packet
 }
 
-func WriteHandler(data []byte) {
-	if data == nil { return }
-	
-	data = append(data, 0x0A);
+func WriteHandler() {
+	for true {
+		if len(writeQueue) > 0 {
+			data := writeQueue[0]
 
-	if (sConn != nil) {
-		log_message(fmt.Sprintf("Writing: %s", data))
+			if (len(writeQueue) > 1) {
+				writeQueue = writeQueue[1:]
+			}
 
-		_, err := sConn.Write(data)
+			if data == nil { return }
+			
+			data = append(data, 0x0A);
+
+			_, err := sConn.Write(data)
+			
+			if err != nil {
+				log_message(err.Error())
+			}
+		}
+	}
+}
+
+func ReadHandler() {
+	for true {
+		var building bool = false
+		var buf []byte
+		var ch []byte = make([]byte, 1)
+
+		_, err := sConn.Read(ch)
+
+		if err != nil {
+			log_message(err.Error())
+			continue
+		}
+
+		for ch[0] != MSG_END {
+			_, err = sConn.Read(ch)
+
+			if err != nil {
+				log_message(err.Error())
+				continue
+			}
+
+			if ch[0] == MSG_START {
+				building = true;
+			} else if ch[0] == MSG_END {
+				break
+			} else if building {
+				buf = append(buf, ch[0])
+			}
+		}
 		
-		if err != nil {
-			log_message(err.Error())
+		if buf != nil {
+			readQueue = append(readQueue, string(buf))
 		}
 	}
 }
 
-func ReadHandler() []byte {
-	var building bool = false
-	var buf []byte
-	var ch []byte = make([]byte, 1)
+func CloseSerial() {
+	sigs := make(chan os.Signal, 2)
 
-	_, err := sConn.Read(ch)
+	signal.Notify(sigs, os.Interrupt, syscall.SIGTERM)
 
-	if err != nil {
-		log_message(err.Error())
-		return nil
-	}
-
-	log_message(fmt.Sprintf("Reading: %s", ch))
-
-	for ch[0] != MSG_END {
-		if !building && len(writeQueue) > 0 { return []byte{} }
-
-		_, err = sConn.Read(ch)
-		if err != nil {
-			log_message(err.Error())
-			return nil
-		}
-
-		if ch[0] == MSG_START {
-			building = true;
-		} else if ch[0] == MSG_END {
-			break
-		}else if building {
-			buf = append(buf, ch[0])
-		}
-	}
-	
-	return buf
+	go func() {
+		<-sigs
+		sConn.Close()
+		os.Exit(0)
+	}()
 }
+
 
 func ActionHandler() {
-	for true {
-		
-		fmt.Println(len(writeQueue))
-
+	CloseSerial()
+	go ReadHandler()
+	go WriteHandler()
+ 	go DataHandler();
+}
+	/*for true {
 		if len(writeQueue) > 0 {
 			data := writeQueue[0]
 
@@ -571,7 +594,7 @@ func ActionHandler() {
 			}
 		}
 	}
-}
+}*/
 
 func ft(t time.Time) string {
 	hour := t.Hour()

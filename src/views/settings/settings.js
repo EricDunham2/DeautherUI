@@ -1,6 +1,8 @@
 Vue.component('settings', {
     data: function () {
         return {
+            saving: false,
+            loading: false,
             accesspoint: {
                 ssid: null,
                 passwd: null,
@@ -27,26 +29,36 @@ Vue.component('settings', {
     },
     methods: {
         _getConfig: function () {
+            this.loading = true;
             axios
                 .get("/getConfig")
                 .then(this._setConfig)
         },
         _setConfig: function (result) {
-            if (!result || !result.data) {
-                return;
+            try {
+                if (!result || !result.data) {
+                    return;
+                }
+
+                this.accesspoint = result.data.accesspoint;
+                this.apScanner = result.data.apScanner;
+                this.packetScanner = result.data.packetScanner;
+                this.deauther = result.data.deauther;
+
+                $(function () {
+                    custom_input();
+                });
+            } catch (err) {
+                console.log(err);
+            } finally {
+                this.loading = false;
             }
 
-            this.accesspoint = result.data.accesspoint;
-            this.apScanner = result.data.apScanner;
-            this.packetScanner = result.data.packetScanner;
-            this.deauther = result.data.deauther;
-
-            $(function () {
-                custom_input();
-            });
         },
         saveConfig: function () {
             //Find a better way to force int
+            this.saving = true;
+
             this.accesspoint.channel = parseInt(this.accesspoint.channel);
 
             this.apScanner.channel = parseInt(this.apScanner.channel);
@@ -70,12 +82,18 @@ Vue.component('settings', {
                 .then(this.configConfirmation);
         },
         configConfirmation: function(result) {
-            if (!result || result.status !== 200) {
-                toastr("Something happened while saving, please try again...", "error", 1000);
-                return;
-            }
+            try {
+                if (!result || result.status !== 200) {
+                    toastr("Something happened while saving, please try again...", "error", 1000);
+                    return;
+                }
 
-            toastr("Save successful", "success", 1000);
+                toastr("Save successful", "success", 1000);
+            } catch(err) {
+                console.log(err)
+            } finally {
+                this.saving = false;
+            }
         }
     },
     mounted() {
@@ -83,6 +101,27 @@ Vue.component('settings', {
     },
     template: `
         <div class="flex-container col-100 hc no-touch-top">
+            <div class="panel-content vhc" v-if="saving || loading" style="height:110vh; background: rgba(21,21,21,.7); position:fixed; top: 0px !important;">
+                <div>
+                    <div class="row clearfix">
+                        <div class="square one"></div> 
+                        <div class="square two"></div>
+                        <div class="square three"></div>
+                    </div>
+
+                    <div class="row clearfix">
+                        <div class="square eight"></div> 
+                        <div class="square nine"></div>
+                        <div class="square four"></div>
+                    </div>
+
+                    <div class="row clearfix">
+                        <div class="square seven"></div> 
+                        <div class="square six"></div>
+                        <div class="square five"></div>
+                    </div>
+                </div>
+            </div>
             <div class="panel col-100 no-touch-top">
                 <div class="panel-header">Flash</div>
                 <div class="panel-content">
