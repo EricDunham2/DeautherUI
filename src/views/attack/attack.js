@@ -43,6 +43,7 @@ Vue.component('attack', {
                 if (!ap.stations || !ap.stations.length) {
                     return;
                 }
+                
                 ap.stations.forEach(sta => {
                     sta.selected = false; //Changes so that when rescans it doesnt overwrite old values
                    //sta.fmtMac = this._createMacString(sta.mac);
@@ -74,6 +75,7 @@ Vue.component('attack', {
                 if (!this.selectedStations) {
                     this.selectedStations = [];
                 }
+
                 this.selectedStations.push(sta);
             } else {
                 var index = this.selectedStations.findIndex(st => st.mac === sta.mac);
@@ -240,15 +242,12 @@ Vue.component('attack', {
             </div>
             <div class="footer l2 vhc" style="position:fixed; bottom:0; height:max-content;">
                 <div class="vhc col-100">
-                    <div class="vhc" style="width:150px;">
+                    <div class="vhc" style="width:100px; height:80px;">
                         <input id="deauth" type="checkbox" role="button" class="toggle-btn" v-model="isAttacking" @click="toggleAttack()"/>
-                        <label for="deauth" class="toggle-lbl vh-center" style="width:100%; margin:0;" ><span class="v-center" style="text-transform: uppercase;">Start</span></label>
+                        <label for="deauth" class="toggle-lbl vh-center" style="width:100%; margin:0; border-radius:2px;" ><span class="v-center" style="text-transform: uppercase;">Start</span></label>
                     </div>
                 </div>
             </div>
-            <!--<div v-if="isAttacking" class="vhc" id="statusbar" style="height:30px; position: absolute; width:100%; background:crimson; color:black; font-size: 15px;">
-                [<span ></span>>]
-            </div>-->
         </div>
     </div>
     `

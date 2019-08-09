@@ -1,24 +1,81 @@
+var vm = this;
+
 Vue.component('monitor', {
-    data: function() {
+    data: function () {
         return {
-            packets:[],
+            packets: [],
+            cht: null
         }
     },
     methods: {
-        _getPackets: function() {
+        _getPackets: function () {
             axios
-            .get("/getPackets")
-            .then(this._setPackets)
+                .get("/getPackets")
+                .then(this._setPackets)
         },
-        _setPackets: function(response) {
-            if (!response.data) { return; }
+        _setPackets: function (response) {
+            if (!response.data) {
+                return;
+            }
             this.packets = [];
 
             console.log(response.data);
 
             response.data.forEach(pkt => {
-                this.packets.push(pkt);          
+                this.packets.push(pkt);
             });
+        },
+        _updateChart: function () {
+            var self = this;
+
+            axios
+                .get("/getPacketCount")
+                .then(handle)
+
+            function handle(response) {
+                self.cht.data.labels.push("");
+                self.cht.data.datasets.forEach((dataset) => {
+                    dataset.data.push(response.data);
+                });
+
+                self.cht.update();
+            }
+        },
+        _createChart: function () {
+            var ctx = document.getElementById('packetMonitor').getContext('2d');
+
+            this.cht = new Chart(ctx, {
+                type: "line",
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'Packets Per Second',
+                        backgroundColor: '#111111',
+                        borderColor: '#04f886',
+                        data: []
+                    }]
+                },
+                options: {
+                    scales: {
+                        xAxes: [{
+                            gridLines: {
+                                color: "rgba(0, 0, 0, 0)",
+                            },
+                            ticks: {
+                                maxTicksLimit: 20
+                            }
+                        }],
+                        yAxes: [{
+                            gridLines: {
+                                color: "rgba(0, 0, 0, 0)",
+                            }
+                        }]
+                    }
+                },
+                legend: {
+                    hidden: true
+                }
+            })
         }
     },
     beforeMount() {
@@ -28,9 +85,16 @@ Vue.component('monitor', {
             this._getPackets();
         }, 300);
     },
-    beforeDestroy() {
+    beforeDestroy() {},
+    mounted() {
+        var self = this;
+        this._createChart();
+
+        setInterval(function () {
+            self._updateChart();
+        }, 1000);
     },
-    template : `
+    template: `
     <div class="flex-container col-100 no-touch-top vhc" style="max-height:100%; overflow-y:scroll;" id="monitor">
         <div class="table col-80">
             <div class="panel-content vhc" v-if="!packets" style="height:110vh; background: rgba(21,21,21,.7); position:fixed; top: 0px !important;">
@@ -54,6 +118,9 @@ Vue.component('monitor', {
                     </div>
                 </div>
             </div>
+
+            <canvas id="packetMonitor" style="height: 150px;" class="col-80"></canvas>
+
             <div class="col-100 vc col-header" style="color: #9e16c3;; border-radius: 2px; padding-top: 20px;" v-if="packets">
                 <!--<div class="col-5 vhc" style="flex-grow:1;"></div>-->
                 <div class="col-30 vhc" style="flex-grow:1;">Source</div>

@@ -147,7 +147,7 @@ Vue.component('home', {
     },
     template: `
     <div class="flex-container col-100 vhc">
-        <div class="l1 col-100 vhc"  id="particles-js" style="position:absolute; top: 0;">
+        <div class="l1 vhc"  id="particles-js" style="position:absolute; top: 0; width: 100vw; height: 100vh;"/>
             <!--<img src="/static/images/0_lW3k05c1RPFYo9JF.jpg" style="width:100%;">-->
             <!--<div class="main-screen-text" style="position: absolute; font-size: 40px; -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Hack the Planet</div>-->
 
