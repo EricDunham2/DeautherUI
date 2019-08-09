@@ -56,25 +56,33 @@ Vue.component('monitor', {
                     }]
                 },
                 options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
                     scales: {
                         xAxes: [{
                             gridLines: {
                                 color: "rgba(0, 0, 0, 0)",
                             },
                             ticks: {
-                                maxTicksLimit: 20
+                                max: 10,
                             }
                         }],
                         yAxes: [{
                             gridLines: {
                                 color: "rgba(0, 0, 0, 0)",
+                            },
+                            ticks: {
+                                beginAtZero:0,
+                                display: false,
                             }
                         }]
+                    },
+                    elements: {
+                        point:{
+                            radius: 0
+                        }
                     }
                 },
-                legend: {
-                    hidden: true
-                }
             })
         }
     },
