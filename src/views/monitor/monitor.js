@@ -14,15 +14,11 @@ Vue.component('monitor', {
                 .then(this._setPackets)
         },
         _setPackets: function (response) {
-            if (!response.data) {
-                return;
-            }
+            if (!response.data) { return; }
             this.packets = [];
-
-            console.log(response.data);
-
+            
             response.data.forEach(pkt => {
-                this.packets.push(pkt);
+                this.packets.unshift(pkt);
             });
         },
         _updateChart: function () {
@@ -127,7 +123,7 @@ Vue.component('monitor', {
                 </div>
             </div>
 
-            <canvas id="packetMonitor" style="height: 150px;" class="col-80"></canvas>
+            <canvas id="packetMonitor" style="max-height: 150px;" class="col-80"></canvas>
 
             <div class="col-100 vc col-header" style="color: #9e16c3;; border-radius: 2px; padding-top: 20px;" v-if="packets">
                 <!--<div class="col-5 vhc" style="flex-grow:1;"></div>-->

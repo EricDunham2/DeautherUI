@@ -185,7 +185,7 @@ var mockPacketMac []string = []string{
 func initMockData() {
 	for true {
 		readQueue = append(readQueue, generateData())
-		time.Sleep(350 * time.Millisecond)
+		time.Sleep(1000 * time.Millisecond)
 	}
 }
 
@@ -329,7 +329,7 @@ func DataHandler() {
 				macb := []byte(mac)
 
 				if len(macb) == 6 {
-					entry, err := db.Query(fmt.Sprintf("%X:%X:%X:%X:%X:%X", macb[0], macb[1], macb[2], macb[3], macb[4], macb[5]))
+					entry, err := db.Query(fmt.Sprintf("%02X:%02X:%02X:%02X:%02X:%02X", macb[0], macb[1], macb[2], macb[3], macb[4], macb[5]))
 
 					if err != nil {
 						log.Println(err.Error())
@@ -356,7 +356,7 @@ func DataHandler() {
 
 			if mac != nil {
 				station.Mac = []byte(mac)
-				station.FmtMac = fmt.Sprintf("%X:%X:%X:%X:%X:%X", mac[0], mac[1], mac[2], mac[3], mac[4], mac[5])
+				station.FmtMac = fmt.Sprintf("%02X:%02X:%02X:%02X:%02X:%02X", mac[0], mac[1], mac[2], mac[3], mac[4], mac[5])
 			}
 
 			if err != nil {
@@ -579,7 +579,7 @@ func deauthAttack(w http.ResponseWriter, r *http.Request) {
  */
 
 func deauthStation(station Station) {
-	log.Println(fmt.Sprintf("%X:%X:%X:%X:%X:%X", station.Mac[0], station.Mac[1], station.Mac[2], station.Mac[3], station.Mac[4], station.Mac[5]))
+	log.Println(fmt.Sprintf("%02X:%02X:%02X:%02X:%02X:%02X", station.Mac[0], station.Mac[1], station.Mac[2], station.Mac[3], station.Mac[4], station.Mac[5]))
 
 	var pa [][]byte = [][]byte{
 		{0xC0, 0x00},   // Type, Subtype
@@ -646,6 +646,8 @@ func WriteHandler() {
 			}
 
 			data = append(data, 0x0A)
+
+			fmt.Println(fmt.Sprintf("Command => %s", data))
 
 			_, err := sConn.Write(data)
 
