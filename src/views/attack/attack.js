@@ -47,7 +47,7 @@ Vue.component('attack', {
                 ap.stations.forEach(sta => {
                     sta.selected = false; //Changes so that when rescans it doesnt overwrite old values
                    //sta.fmtMac = this._createMacString(sta.mac);
-                    sta.ap = ap.bssid;
+                    //sta.ap = ap.bssid;
                 });
             });
 
@@ -77,6 +77,7 @@ Vue.component('attack', {
                 }
 
                 this.selectedStations.push(sta);
+                console.log(this.selectedStations);
             } else {
                 var index = this.selectedStations.findIndex(st => st.mac === sta.mac);
                 this.selectedStations.splice(index, 1);

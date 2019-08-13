@@ -369,6 +369,7 @@ func DataHandler() {
 			if _, ok := AvailableAccesspoints[packet.Bssid]; ok {
 				apMac, err := net.ParseMAC(packet.Bssid)
 				station.AP = []byte(apMac)
+
 				station.Vendor = packet.Vendor
 
 				if err != nil {
@@ -579,8 +580,6 @@ func deauthAttack(w http.ResponseWriter, r *http.Request) {
  */
 
 func deauthStation(station Station) {
-	log.Println(fmt.Sprintf("%02X:%02X:%02X:%02X:%02X:%02X", station.Mac[0], station.Mac[1], station.Mac[2], station.Mac[3], station.Mac[4], station.Mac[5]))
-
 	var pa [][]byte = [][]byte{
 		{0xC0, 0x00},   // Type, Subtype
 		{0x00, 0x00},   // Duration
@@ -604,13 +603,13 @@ func deauthStation(station Station) {
 	settingsDat := readConfig()
 	json.Unmarshal(settingsDat, &settings)
 
-	cmd := fmt.Sprintf("send -interval=%d -channel=%d -buffer=%s", settings.Deauther.Interval, settings.Deauther.Channel, createPacket(pa))
+	cmd := fmt.Sprintf("send -interval=%d -channel=%d -buffer=%x", settings.Deauther.Interval, settings.Deauther.Channel, createPacket(pa))
 	log.Println(cmd)
 	log_message(cmd)
 
 	writeQueue = append(writeQueue, []byte(cmd))
 
-	cmd = fmt.Sprintf("send -interval=%d -channel=%d -buffer=%s", settings.Deauther.Interval, settings.Deauther.Channel, createPacket(ps))
+	cmd = fmt.Sprintf("send -interval=%d -channel=%d -buffer=%x", settings.Deauther.Interval, settings.Deauther.Channel, createPacket(ps))
 	log.Println(cmd)
 	log_message(cmd)
 
@@ -647,7 +646,7 @@ func WriteHandler() {
 
 			data = append(data, 0x0A)
 
-			fmt.Println(fmt.Sprintf("Command => %s", data))
+			log.Println(fmt.Sprintf("Command => %s", data))
 
 			_, err := sConn.Write(data)
 
