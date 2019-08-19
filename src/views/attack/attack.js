@@ -45,6 +45,11 @@ Vue.component('attack', {
                 }
                 
                 ap.stations.forEach(sta => {
+                    if (this.selectedStations != null && this.selectedStations.find(st => st.mac === sta.mac)) { 
+                        sta.selected = true;
+                        return;
+                    }
+
                     sta.selected = false; //Changes so that when rescans it doesnt overwrite old values
                    //sta.fmtMac = this._createMacString(sta.mac);
                     //sta.ap = ap.bssid;
@@ -184,7 +189,7 @@ Vue.component('attack', {
                                             <img v-else-if="ap.rssi >= 50 && ap.rssi < 75" class="icon-md" src="/static/images/wifi_3_grey.png">	
                                             <img v-else-if="ap.rssi >= 75 && ap.rssi <= 100" class="icon-md" src="/static/images/wifi_4_grey.png">	
                                         </div>
-                                        <div class="panel-footer vhc">
+                                        <div class="panel-footer tc">
                                             <div v-text="ap.bssid"></div>
                                         </div>
                                     </div>
@@ -212,7 +217,7 @@ Vue.component('attack', {
                                         <div class="panel-content vhc">
                                             <i class="material-icons icon-md vhc">devices</i>
                                         </div>
-                                        <div class="panel-footer vhc">
+                                        <div class="panel-footer tc">
                                             <div v-text="sta.vendor"></div>
                                         </div>
                                     </div>
@@ -231,7 +236,7 @@ Vue.component('attack', {
                                         <div class="panel-content vhc">
                                             <i class="material-icons icon-md vhc">devices</i>
                                         </div>
-                                        <div class="panel-footer vhc">
+                                        <div class="panel-footer tc">
                                             <div v-text="sta.vendor"></div>
                                         </div>
                                     </div>

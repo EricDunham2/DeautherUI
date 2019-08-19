@@ -9,7 +9,7 @@ new Vue({
 			document.getElementById("sidebar-toggle").checked = false;
 			
 			var navbar = document.getElementsByClassName("navbar")[0];
-			navbar.style.background = "transparent"
+			navbar.style.background = "#1b2127"
 		},
 		_sniffPackets: function() {
 			axios
@@ -21,34 +21,19 @@ new Vue({
 				console.log(result);
 			}
 		},
-		changeNavbar: function () {
-			var sb = document.getElementById("sidebar-toggle");
-			var navbar = document.getElementsByClassName("navbar")[0];
-	
-			if (sb.checked) {
-			navbar.style.background = "rgba(0,0,0,.9)"
-			} else {
-				var body = document.getElementsByTagName("body")[0];
-	
-				if (body.scrollTop >= 50){ return; }
-	
-				navbar.style.background = "transparent";
-			}
-		},
 		scrollHandler() {
 			var body = document.getElementsByTagName("body")[0];
 			var navbar = document.getElementsByClassName("navbar")[0];
 		
 			if (body.scrollTop >= 50) {
-				navbar.style.background = "rgba(0,0,0,.9)";
+				navbar.style.background = "#1b2127";//"rgba(0,0,0,.9)";
 			} else {
-				navbar.style.background = "transparent";
+				navbar.style.background = "#1b2127";
 			}
 		}
 	},
 	beforeMount() {
 		this._sniffPackets();
-
 	},
 	beforeDestroy() {
 	},
@@ -126,7 +111,7 @@ function custom_input() {
 		$(this).parent(".input-group").each(function () {
 			$("label", this).css({
 				"font-size": "13px",
-				"color": "#04f886"
+				"color": "#b7bdd1"
 			})
 		})
 	}).blur(function () {
@@ -144,7 +129,7 @@ function custom_input() {
 		} else {
 			$(this).css({
 				"box-shadow": "none",
-				"background": "#111111",
+				"background": "#353a44",
 			})
 
 			$(this).parent(".input-group").each(function () {

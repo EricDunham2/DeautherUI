@@ -31,7 +31,7 @@ function custom_input() {
       $(this).parent(".input-group").each(function () {
           $("label", this).css({
               "font-size": "13px",
-              "color": "#04f886"
+              "color": "#b7bdd1"
           })
       })
   }).blur(function () {
@@ -49,7 +49,7 @@ function custom_input() {
       } else {
           $(this).css({ 
               "box-shadow": "none",
-              "background": "#111111",
+              "background": "#353a44",
           })
 
           $(this).parent(".input-group").each(function() {

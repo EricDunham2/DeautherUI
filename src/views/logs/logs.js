@@ -31,8 +31,8 @@ Vue.component('logs', {
     template: `
         <div class="flex-container col-100 no-touch-top vhc" style="max-height:100%; overflow-y:scroll;" id="logger">
             <div class="col-80" id="logs" style="padding-left:10px;" v-for="log in logs">
-                <span v-text="log.time" style="color:#00FF88; font-weight: bold;"></span>
-                <span v-text="log.data" style="color:blueviolet;"></span>
+                <span v-text="log.time" style="color:#1b6b52; font-weight: bold;"></span>
+                <span v-text="log.data" style="color:#b7bdd1;"></span>
             </div>
         </div>
     `
