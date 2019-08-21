@@ -139,31 +139,31 @@ Vue.component('monitor', {
             <div class="col-100 card-row" style="flex-grow:1;" v-for="packet in packets">
                 <!--<div class="col-5 vhc"></div>-->
                 <div class="col-20 vhc" style="flex-grow:1; overflow:hidden;">
-                    <div class="card-row-header">Source: </div>
+                    <div class="card-row-header">Source:&nbsp</div>
                     <div v-text="packet.src"></div>
                 </div>
                 <div class="col-20 vhc" style="flex-grow:1; overflow:hidden;">
-                    <div class="card-row-header">Destination: </div>
+                    <div class="card-row-header">Destination:&nbsp</div>
                     <div v-text="packet.dst"></div>
                 </div>
                 <div class="col-5 vhc" style="flex-grow:1; overflow:hidden;">
-                    <div class="card-row-header">RSSI: </div>
+                    <div class="card-row-header">RSSI:&nbsp</div>
                     <div v-text="packet.rssi"></div>
                 </div>
                 <div class="col-5 vhc" style="flex-grow:1; overflow:hidden;">
-                    <div class="card-row-header">Ch: </div>
+                    <div class="card-row-header">Ch:&nbsp</div>
                     <div v-text="packet.channel"></div>
                 </div>
                 <div class="col-5 vhc" style="flex-grow:1; overflow:hidden;">
-                    <div class="card-row-header">Type: </div>
+                    <div class="card-row-header">Type:&nbsp</div>
                     <div v-text="packet.pkt_type"></div>
                 </div>
                 <div class="col-10 vhc" style="flex-grow:1; overflow:hidden;">
-                    <div class="card-row-header">Type: </div>
+                    <div class="card-row-header">Type:&nbsp</div>
                     <div v-text="packet.Enc"></div>
                 </div>
                 <div class="col-30 vhc" style="flex-grow:1; overflow:hidden;">
-                    <div class="card-row-header">Vendor: </div>
+                    <div class="card-row-header">Vendor:&nbsp</div>
                     <div v-text="packet.vendor"></div>
                 </div>
             </div>
