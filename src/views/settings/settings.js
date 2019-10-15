@@ -60,12 +60,18 @@ Vue.component('settings', {
             this.saving = true;
 
             this.accesspoint.channel = parseInt(this.accesspoint.channel);
+            this.accesspoint.hidden = this.accesspoint.hidden.toLowerCase() == 'true'
 
             this.apScanner.channel = parseInt(this.apScanner.channel);
             this.apScanner.interval = parseInt(this.apScanner.interval);
+            this.apScanner.async = this.apScanner.async.toLowerCase() == 'true'
+            this.apScanner.hop = this.apScanner.hop.toLowerCase() == 'true'
+            this.apScanner.deep = this.apScanner.deep.toLowerCase() == 'true'
+
 
             this.packetScanner.channel = parseInt(this.packetScanner.channel);
             this.packetScanner.interval = parseInt(this.packetScanner.interval);
+            this.packetScanner.hop = this.packetScanner.hop.toLowerCase() == 'true'
 
             this.deauther.channel = parseInt(this.deauther.channel);
             this.deauther.interval = parseInt(this.deauther.interval);
@@ -98,6 +104,7 @@ Vue.component('settings', {
     },
     mounted() {
         this._getConfig();
+        custom_input();
     },
     template: `
         <div class="flex-container col-100 hc no-touch-top">

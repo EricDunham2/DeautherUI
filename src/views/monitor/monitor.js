@@ -4,25 +4,79 @@ Vue.component('monitor', {
     data: function () {
         return {
             packets: [],
-            cht: null
+            cht: null,
+            filtersShown: {
+                source: false,
+                dest: false,
+                rssi: false,
+                channel: false,
+                type: false,
+                vendor:false,
+            },
+            filters: {
+                src: null,
+                dst: null,
+                rssi: null,
+                channel: null,
+                pkt_type: null,
+                vendor:null,
+            }
         }
     },
     methods: {
-        _getPackets: function () {
+        showFilter: function(filter) {
+            this.filtersShown[filter] = !this.filtersShown[filter];
+            this.filterActive = false;
+
+            Object.values(this.filtersShown).forEach(val => {
+                if (val) {
+                    this.filterActive = true;
+                }
+            });
+        },
+        filterChanged: function() {
+            custom_input();
+        },
+        _filterData: function(data) {
+            Object.keys(this.filters).forEach(fil => {
+                console.log(this.filters[fil])
+
+                if (this.filters[fil] != null) {
+                    data.forEach((ele, idx, arr) => {
+                        console.log(ele)
+                        if (!ele[fil].includes(this.filters[fil])) {
+                            data.splice(idx,1);
+                            console.log(data[idx]);
+                        }
+                    })
+                }
+            });
+
+            return data;
+        },
+        _getPackets: function() {
             axios
                 .get("/getPackets")
                 .then(this._setPackets)
         },
         _setPackets: function (response) {
             if (!response.data) { return; }
-            this.packets = [];
+            var tempPackets = []
             
             response.data.forEach(pkt => {
-                this.packets.unshift(pkt);
+               tempPackets.unshift(pkt);
             });
+
+            console.log(this.filterActive);
+
+            if (this.filterActive) { 
+                tempPackets = this._filterData(tempPackets);
+            }
+
+            this.packets = tempPackets;
         },
         _updateChart: function () {
-            var self = this;
+            /*var self = this;
 
             axios
                 .get("/getPacketCount")
@@ -35,10 +89,10 @@ Vue.component('monitor', {
                 });
 
                 self.cht.update();
-            }
+            }*/
         },
         _createChart: function () {
-            var ctx = document.getElementById('packetMonitor').getContext('2d');
+            /*var ctx = document.getElementById('packetMonitor').getContext('2d');
 
             this.cht = new Chart(ctx, {
                 type: "line",
@@ -79,7 +133,7 @@ Vue.component('monitor', {
                         }
                     }
                 },
-            })
+            })*/
         }
     },
     beforeMount() {
@@ -133,7 +187,13 @@ Vue.component('monitor', {
                 <div class="col-5 vhc" style="flex-grow:1;">CH</div>
                 <div class="col-5 vhc" style="flex-grow:1;">Type</div>
                 <div class="col-10 vhc" style="flex-grow:1;">Enc</div>
-                <div class="col-30 vhc" style="flex-grow:1;">Vendor</div>
+                <div class="col-30 vhc" style="flex-grow:1;">
+                    <span v-if="!filtersShown['vendor']" v-on:click="showFilter('vendor')">Vendor</span>
+                    <div class="input-group" v-if="filtersShown['vendor']">
+                        <label for="vendor" id="panel-label" class="dyn-input-label">Vendor</label> 
+                        <input type="text" id="panel-input" name="vendor" class="dyn-input" v-model="filters['vendor']" v-on:change="filterChanged('vendor')">
+                    </div>
+                </div>
             </div>
 
             <div class="col-100 card-row" style="flex-grow:1;" v-for="packet in packets">

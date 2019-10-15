@@ -49,7 +49,7 @@ function custom_input() {
       } else {
           $(this).css({ 
               "box-shadow": "none",
-              "background": "#353a44",
+              "background": "#111",
           })
 
           $(this).parent(".input-group").each(function() {

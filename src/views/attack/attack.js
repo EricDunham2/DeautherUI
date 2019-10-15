@@ -173,7 +173,7 @@ Vue.component('attack', {
                             <div class="panel-content col-90 hc" id="targetList" style="overflow:auto; height:calc(100% - 75px)">
                                 <template v-if="!selectedAccesspoint">
                                     <div
-                                        class="ap-information-panel__medium l5 clickable no-touch-table panel"
+                                        class="ap-information-panel__medium l5 clickable no-touch-table panel target"
                                         v-on:click="setSelectedAccesspoint(ap)"
                                         v-on:mouseover="onTileHover(ap)"
                                         v-on:mouseout="offTileHover()"
@@ -204,7 +204,7 @@ Vue.component('attack', {
                                         </div>
                                     </div>
                                     <div
-                                        class="ap-information-panel__medium l5 clickable no-touch-table panel"
+                                        class="ap-information-panel__medium target l5 clickable no-touch-table panel"
                                         v-on:click="selectStation(sta)"
                                         v-on:mouseover="onTileHover(sta)"
                                         v-on:mouseout="offTileHover()"
@@ -214,7 +214,7 @@ Vue.component('attack', {
                                         <div class="panel-header vhc">
                                             <div v-text="sta.fmtMac"></div>
                                         </div>
-                                        <div class="panel-content vhc">
+                                        <div class="panel-content vhc" style="color:slateblue">
                                             <i class="material-icons icon-md vhc">devices</i>
                                         </div>
                                         <div class="panel-footer tc">
@@ -227,14 +227,14 @@ Vue.component('attack', {
                         <div class="panel col-30 no-touch-top main-content-col">
                             <div class="panel-header vhc">Targets</div>
                             <div class="panel-content col-90 hc" id="selectedTargets" style="overflow:auto; height:calc(100% - 75px)">
-                                <div class="ap-information-panel__medium l5 clickable no-touch-table shadow" v-on:click="selectStation(sta)" v-for="sta in selectedStations"
+                                <div class="ap-information-panel__medium l5 clickable no-touch-table target" v-on:click="selectStation(sta)" v-for="sta in selectedStations"
                                 v-on:mouseover="onTileHover(sta)" v-on:mouseout="offTileHover()">
                                     <div class="panel col-100">
                                         <div class="panel-header vhc">
                                             <div v-text="sta.fmtMac"></div>
                                         </div>
                                         <div class="panel-content vhc">
-                                            <i class="material-icons icon-md vhc">devices</i>
+                                            <i class="material-icons icon-md vhc devices-icon" style="color:slateblue;">devices</i>
                                         </div>
                                         <div class="panel-footer tc">
                                             <div v-text="sta.vendor"></div>
@@ -246,9 +246,9 @@ Vue.component('attack', {
                     </div>
                 </div>
             </div>
-            <div class="footer l2 vhc" style="position:fixed; bottom:0; height:max-content;">
+            <div class="footer vhc" style="position:fixed; bottom:0; height:max-content; background:#111;">
                 <div class="vhc col-100">
-                    <div class="vhc" style="width:100px; height:80px;">
+                    <div class="vhc" style="width:100px; height:65px;">
                         <input id="deauth" type="checkbox" role="button" class="toggle-btn" v-model="isAttacking" @click="toggleAttack()"/>
                         <label for="deauth" class="toggle-lbl vh-center" style="width:100%; margin:0; border-radius:2px;" ><span class="v-center" style="text-transform: uppercase;">Start</span></label>
                     </div>

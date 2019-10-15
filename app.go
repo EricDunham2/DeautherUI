@@ -261,6 +261,8 @@ func initRoutes() {
 }
 
 func getAccessPoints(w http.ResponseWriter, r *http.Request) {
+	log.Println(settings)
+
 	var cmd string = fmt.Sprintf("scan -async=%t -hidden=%t -channel=%d -hop=%t", settings.ApScanner.Async, settings.ApScanner.Deep, settings.ApScanner.Channel, settings.ApScanner.Hop)
 	log.Println(cmd)
 	log_message(cmd)
@@ -600,8 +602,8 @@ func deauthStation(station Station) {
 		{0x01, 0x00},
 	}
 
-	settingsDat := readConfig()
-	json.Unmarshal(settingsDat, &settings)
+	//settingsDat := readConfig()
+	//json.Unmarshal(settingsDat, &settings)
 
 	cmd := fmt.Sprintf("send -interval=%d -channel=%d -buffer=%x", settings.Deauther.Interval, settings.Deauther.Channel, createPacket(pa))
 	log.Println(cmd)
