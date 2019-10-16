@@ -6,11 +6,11 @@ Vue.component('monitor', {
             packets: [],
             cht: null,
             filtersShown: {
-                source: false,
-                dest: false,
+                src: false,
+                dst: false,
                 rssi: false,
                 channel: false,
-                type: false,
+                pkt_type: false,
                 vendor:false,
             },
             filters: {
@@ -25,34 +25,47 @@ Vue.component('monitor', {
     },
     methods: {
         showFilter: function(filter) {
-            this.filtersShown[filter] = !this.filtersShown[filter];
-            this.filterActive = false;
 
-            Object.values(this.filtersShown).forEach(val => {
-                if (val) {
-                    this.filterActive = true;
-                }
-            });
+            this.filtersShown[filter] = true;
+            this.filterActive = true;
+
+            document.getElementById(`panel-input-${filter}`).focus();
+        },
+        hideFilter: function(filter) {
+            if (this.filters[filter] == null || this.filters[filter] == "") {
+                this.filtersShown[filter] = false;
+                this.filterActive = false;
+
+                Object.values(this.filtersShown).forEach(val => {
+                    if (val) {
+                        this.filterActive = true;
+                    }
+                });
+            }
         },
         filterChanged: function() {
             custom_input();
         },
         _filterData: function(data) {
-            Object.keys(this.filters).forEach(fil => {
-                console.log(this.filters[fil])
+            var copy = JSON.parse(JSON.stringify(data));
 
+            Object.keys(this.filters).forEach(fil => {
                 if (this.filters[fil] != null) {
-                    data.forEach((ele, idx, arr) => {
-                        console.log(ele)
-                        if (!ele[fil].includes(this.filters[fil])) {
-                            data.splice(idx,1);
-                            console.log(data[idx]);
+                    copy.forEach((ele, idx, arr) => {
+                        if (ele[fil] == null || !ele[fil].toString().toLowerCase().includes(this.filters[fil].toString().toLowerCase())) {
+                            copy[idx] = null;
                         }
-                    })
+                    });
+
+                    copy = copy.filter(function (el) {
+                        return el != null;
+                    });
                 }
             });
 
-            return data;
+
+
+            return copy;
         },
         _getPackets: function() {
             axios
@@ -66,8 +79,6 @@ Vue.component('monitor', {
             response.data.forEach(pkt => {
                tempPackets.unshift(pkt);
             });
-
-            console.log(this.filterActive);
 
             if (this.filterActive) { 
                 tempPackets = this._filterData(tempPackets);
@@ -181,17 +192,53 @@ Vue.component('monitor', {
 
             <div class="col-100 vc col-header" style="color: #efefef; border-radius: 2px; padding-top: 20px;" v-if="packets">
                 <!--<div class="col-5 vhc" style="flex-grow:1;"></div>-->
-                <div class="col-20 vhc" style="flex-grow:1;">Source</div>
-                <div class="col-20 vhc" style="flex-grow:1;">Destination</div>
-                <div class="col-5 vhc" style="flex-grow:1;">RSSI</div>
-                <div class="col-5 vhc" style="flex-grow:1;">CH</div>
-                <div class="col-5 vhc" style="flex-grow:1;">Type</div>
-                <div class="col-10 vhc" style="flex-grow:1;">Enc</div>
-                <div class="col-30 vhc" style="flex-grow:1;">
-                    <span v-if="!filtersShown['vendor']" v-on:click="showFilter('vendor')">Vendor</span>
-                    <div class="input-group" v-if="filtersShown['vendor']">
+                <div class="col-20 vhc" style="flex-grow:1;" v-on:click="showFilter('src')">
+                    <span v-if="!filtersShown['src']" >Source</span>
+                    <div class="input-group" v-if="filtersShown['src']" style="width:100%;">
+                        <label for="src" id="panel-label" class="dyn-input-label">Source</label> 
+                        <input style="width:100%;" type="text" id="panel-input-src" name="src" class="dyn-input" v-model="filters['src']" v-on:change="filterChanged('src')" v-on:blur="hideFilter('src')">
+                    </div>
+                </div>
+                <div class="col-20 vhc" style="flex-grow:1;" v-on:click="showFilter('dst')">
+                    <span v-if="!filtersShown['dst']" >Destination</span>
+                    <div class="input-group" v-if="filtersShown['dst']" style="width:100%;">
+                        <label for="dst" id="panel-label" class="dyn-input-label">Destination</label> 
+                        <input style="width:100%;" type="text" id="panel-input-dst" name="dst" class="dyn-input" v-model="filters['dst']" v-on:change="filterChanged('dst')" v-on:blur="hideFilter('dst')">
+                    </div>
+                </div>
+                <div class="col-5 vhc" style="flex-grow:1;" v-on:click="showFilter('rssi')">
+                    <span v-if="!filtersShown['rssi']" >RSSI</span>
+                    <div class="input-group" v-if="filtersShown['rssi']" style="width:100%;">
+                        <label for="rssi" id="panel-label" class="dyn-input-label">RSSI</label> 
+                        <input style="width:100%;" type="text" id="panel-input-rssi" name="rssi" class="dyn-input" v-model="filters['rssi']" v-on:change="filterChanged('rssi')" v-on:blur="hideFilter('rssi')">
+                    </div>
+                </div>
+                <div class="col-5 vhc" style="flex-grow:1;" v-on:click="showFilter('channel')">
+                    <span v-if="!filtersShown['channel']">Ch</span>
+                    <div style="width:100%;" class="input-group" v-if="filtersShown['channel']">
+                        <label for="channel" id="panel-label" class="dyn-input-label">Ch</label>
+                        <input style="width:100%;" type="text" id="panel-input-channel" name="channel" class="dyn-input" v-model="filters['channel']" v-on:change="filterChanged('channel')" v-on:blur="hideFilter('channel')">
+                    </div>
+                </div>
+                <div class="col-5 vhc" style="flex-grow:1;" v-on:click="showFilter('type')">
+                    <span v-if="!filtersShown['type']">Type</span>
+                    <div style="width:100%;" class="input-group" v-if="filtersShown['pkt_type']">
+                        <label for="type" id="panel-label" class="dyn-input-label">Type</label> 
+                        <input style="width:100%;" type="text" id="panel-input-pkt_type" name="type" class="dyn-input" v-model="filters['type']" v-on:change="filterChanged('pkt_type')" v-on:blur="hideFilter('pkt_type')">
+                    </div>
+                </div>
+                <div class="col-10 vhc" style="flex-grow:1;" v-on:click="showFilter('enc')">
+                    <span v-if="!filtersShown['enc']">Enc</span>
+                    <div class="input-group" v-if="filtersShown['enc']" style="width:100%;">
+                        <label for="enc" id="panel-label" class="dyn-input-label">Enc</label> 
+                        <input style="width:100%;" type="text" id="panel-input-enc" name="enc" class="dyn-input" v-model="filters['enc']" v-on:change="filterChanged('enc')" v-on:blur="hideFilter('enc')">
+                    </div>
+                </div>
+                <div class="col-30 vhc" style="flex-grow:1;" v-on:click="showFilter('vendor')">
+                    <span v-if="!filtersShown['vendor']">Vendor</span>
+                    <div class="input-group" v-if="filtersShown['vendor']" style="width:100%;">
                         <label for="vendor" id="panel-label" class="dyn-input-label">Vendor</label> 
-                        <input type="text" id="panel-input" name="vendor" class="dyn-input" v-model="filters['vendor']" v-on:change="filterChanged('vendor')">
+                        <input style="width:100%;" type="text" id="panel-input-vendor" name="vendor" class="dyn-input" v-model="filters['vendor']" v-on:change="filterChanged('vendor')" v-on:blur="hideFilter('vendor')">
                     </div>
                 </div>
             </div>

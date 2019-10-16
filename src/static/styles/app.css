@@ -280,7 +280,7 @@ a {
 }
 
 .card-row:nth-child(even) {
-  background: #222;
+  background: #111;
 }
 
 .card-row:nth-child(odd) {
@@ -1081,14 +1081,20 @@ img.icon-xs {
     overflow: hidden;
   }
 
-  .target.ap-information-panel__large:hover,
-  .target.ap-information-panel__medium:hover {
-    flex-grow: 2;
-    transition: 400ms cubic-bezier(0.4, 0, 0.2, 1);
-    -webkit-transition: 400ms cubic-bezier(0.4, 0, 0.2, 1);
-    -ms-transition: 400ms cubic-bezier(0.4, 0, 0.2, 1);
+  .target.ap-information-panel__large,
+  .target.ap-information-panel__medium {
+    transition-delay: 500ms;
   }
 
+  .target.ap-information-panel__large:hover,
+  .target.ap-information-panel__medium:hover {
+    max-width: 140px;
+    flex-grow:1;
+    transition-timing-function: ease-in-out;
+    transition: 700ms cubic-bezier(0.4, 0, 0.2, 1);
+    -webkit-transition: 700ms cubic-bezier(0.4, 0, 0.2, 1);
+    -ms-transition: 700ms cubic-bezier(0.4, 0, 0.2, 1);
+  }
 
   .tile-md {
     width: 70px;
@@ -1125,9 +1131,9 @@ img.icon-xs {
     left: calc(0px - 100vw);
     background: #111;
     z-index: 100;
-    transition: 400ms cubic-bezier(0.4, 0, 0.2, 1);
-    -webkit-transition: 400ms cubic-bezier(0.4, 0, 0.2, 1);
-    -ms-transition: 400ms cubic-bezier(0.4, 0, 0.2, 1);
+    transition: left 400ms cubic-bezier(0.4, 0, 0.2, 1);
+    -webkit-transition: left 400ms cubic-bezier(0.4, 0, 0.2, 1);
+    -ms-transition: left 400ms cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   #sidebar-toggle.toggle-btn:checked~.nav-menu {

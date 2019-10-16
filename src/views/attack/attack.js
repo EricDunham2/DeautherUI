@@ -255,6 +255,13 @@ Vue.component('attack', {
                 </div>
             </div>
         </div>
+        <ul id="menuRect" class="contextMenu">
+            <li><a type="radio" name="size" w="64" href="#size_64">Set size to 64</a></li>
+            <li><a type="radio" name="size" w="100" href="#size_100">Set size to 100</a></li>
+            <li><a type="radio" name="size" w="130" href="#size_130">Set size to 130</a></li>
+            <li class="separator"><a type="radio" name="style" val="default" href="#style_default">Use Default Style</a></li>
+            <li><a type="radio" name="style" val="custom" href="#style_custom">Use Custom Style</a></li>
+        </ul>
     </div>
     `
 });
