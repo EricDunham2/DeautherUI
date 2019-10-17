@@ -1086,7 +1086,7 @@ img.icon-xs {
     transition-delay: 500ms;
   }
 
-  .target.ap-information-panel__large:hover,
+  /*.target.ap-information-panel__large:hover,
   .target.ap-information-panel__medium:hover {
     max-width: 140px;
     flex-grow:1;
@@ -1094,7 +1094,7 @@ img.icon-xs {
     transition: 700ms cubic-bezier(0.4, 0, 0.2, 1);
     -webkit-transition: 700ms cubic-bezier(0.4, 0, 0.2, 1);
     -ms-transition: 700ms cubic-bezier(0.4, 0, 0.2, 1);
-  }
+  }*/
 
   .tile-md {
     width: 70px;

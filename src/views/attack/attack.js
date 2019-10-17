@@ -77,6 +77,10 @@ Vue.component('attack', {
             sta.selected = !sta.selected;
 
             if (sta.selected) {
+                sta.ssid = this.selectedAccesspoint.ssid;
+                sta.rssi = this.selectedAccesspoint.rssi;
+                sta.enc = this.selectedAccesspoint.enc;
+
                 if (!this.selectedStations) {
                     this.selectedStations = [];
                 }
@@ -90,6 +94,11 @@ Vue.component('attack', {
         },
         onTileHover: function (item) {
             this.hoveredItem = item;
+            if (!this.hoveredItem.rssi) {
+                this.hoveredItem.ssid = this.selectedAccesspoint.ssid;
+                this.hoveredItem.rssi = this.selectedAccesspoint.rssi;
+                this.hoveredItem.enc = this.selectedAccesspoint.enc;
+            }
         },
         offTileHover: function () {
             this.hoveredItem = null;
@@ -246,7 +255,14 @@ Vue.component('attack', {
                     </div>
                 </div>
             </div>
-            <div class="footer vhc" style="position:fixed; bottom:0; height:max-content; background:#111;">
+            <div class="footer vhc" style="position:fixed; bottom:0; height:max-content; background:#112;">
+                <div class="col-100 vhc" v-if="selectedAccesspoint && hoveredItem" style="color:greenyellow;">
+                    <div style="width: 40%; padding: 5px 5px 0 5px; font-size:13px;" class="vhc">VENDOR: <span v-text="hoveredItem.vendor"> </span></div>
+                    <div style="width: 40%; padding: 5px 5px 0 5px; font-size:13px;" class="vhc">MAC: <span v-text="hoveredItem.fmtMac"></span></div>
+                    <div style="width: 40%; padding: 5px 5px 0 5px; font-size:13px;" class="vhc">SSID: <span v-text="hoveredItem.ssid"></span></div>
+                    <div style="width: 40%; padding: 5px 5px 0 5px; font-size:13px" class="vhc">RSSI: <span v-text="hoveredItem.rssi"></span></div>
+                    <div style="width: 40%; padding: 5px 5px 0 5px; font-size:13px;" class="vhc">ENCRYPTION: <span v-text="selectedAccesspoint.enc"></span></div>
+                </div>
                 <div class="vhc col-100">
                     <div class="vhc" style="width:100px; height:65px;">
                         <input id="deauth" type="checkbox" role="button" class="toggle-btn" v-model="isAttacking" @click="toggleAttack()"/>
@@ -255,13 +271,6 @@ Vue.component('attack', {
                 </div>
             </div>
         </div>
-        <ul id="menuRect" class="contextMenu">
-            <li><a type="radio" name="size" w="64" href="#size_64">Set size to 64</a></li>
-            <li><a type="radio" name="size" w="100" href="#size_100">Set size to 100</a></li>
-            <li><a type="radio" name="size" w="130" href="#size_130">Set size to 130</a></li>
-            <li class="separator"><a type="radio" name="style" val="default" href="#style_default">Use Default Style</a></li>
-            <li><a type="radio" name="style" val="custom" href="#style_custom">Use Custom Style</a></li>
-        </ul>
     </div>
     `
 });

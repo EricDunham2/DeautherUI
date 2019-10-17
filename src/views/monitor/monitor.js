@@ -220,11 +220,11 @@ Vue.component('monitor', {
                         <input style="width:100%;" type="text" id="panel-input-channel" name="channel" class="dyn-input" v-model="filters['channel']" v-on:change="filterChanged('channel')" v-on:blur="hideFilter('channel')">
                     </div>
                 </div>
-                <div class="col-5 vhc" style="flex-grow:1;" v-on:click="showFilter('type')">
-                    <span v-if="!filtersShown['type']">Type</span>
+                <div class="col-5 vhc" style="flex-grow:1;" v-on:click="showFilter('pkt_type')">
+                    <span v-if="!filtersShown['pkt_type']">Type</span>
                     <div style="width:100%;" class="input-group" v-if="filtersShown['pkt_type']">
                         <label for="type" id="panel-label" class="dyn-input-label">Type</label> 
-                        <input style="width:100%;" type="text" id="panel-input-pkt_type" name="type" class="dyn-input" v-model="filters['type']" v-on:change="filterChanged('pkt_type')" v-on:blur="hideFilter('pkt_type')">
+                        <input style="width:100%;" type="text" id="panel-input-pkt_type" name="type" class="dyn-input" v-model="filters['pkt_type']" v-on:change="filterChanged('pkt_type')" v-on:blur="hideFilter('pkt_type')">
                     </div>
                 </div>
                 <div class="col-10 vhc" style="flex-grow:1;" v-on:click="showFilter('enc')">
