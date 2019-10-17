@@ -60,18 +60,18 @@ Vue.component('settings', {
             this.saving = true;
 
             this.accesspoint.channel = parseInt(this.accesspoint.channel);
-            this.accesspoint.hidden = this.accesspoint.hidden.toLowerCase() == 'true'
+            this.accesspoint.hidden = this.accesspoint.hidden.toString().toLowerCase() == 'true'
 
             this.apScanner.channel = parseInt(this.apScanner.channel);
             this.apScanner.interval = parseInt(this.apScanner.interval);
-            this.apScanner.async = this.apScanner.async.toLowerCase() == 'true'
-            this.apScanner.hop = this.apScanner.hop.toLowerCase() == 'true'
-            this.apScanner.deep = this.apScanner.deep.toLowerCase() == 'true'
+            this.apScanner.async = this.apScanner.async.toString().toLowerCase() == 'true'
+            this.apScanner.hop = this.apScanner.hop.toString().toLowerCase() == 'true'
+            this.apScanner.deep = this.apScanner.deep.toString().toLowerCase() == 'true'
 
 
             this.packetScanner.channel = parseInt(this.packetScanner.channel);
             this.packetScanner.interval = parseInt(this.packetScanner.interval);
-            this.packetScanner.hop = this.packetScanner.hop.toLowerCase() == 'true'
+            this.packetScanner.hop = this.packetScanner.hop.toString().toLowerCase() == 'true'
 
             this.deauther.channel = parseInt(this.deauther.channel);
             this.deauther.interval = parseInt(this.deauther.interval);
