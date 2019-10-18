@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"html/template"
 	"math/rand"
 	"net"
@@ -89,18 +90,18 @@ var (
 	router                *mux.Router
 	writeQueue            [][]byte
 	readQueue             []string
-
-	packets     []Packet
-	logs        []string
-	sConn       *serial.Port
-	settings    *Settings
-	db          oui.StaticDB
-	packetCount uint
+	debug                 = flag.Bool("debug", false, "Run in debug")
+	packets               []Packet
+	logs                  []string
+	sConn                 *serial.Port
+	settings              *Settings
+	db                    oui.StaticDB
+	packetCount           uint
 )
 
 func main() {
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
-
+	flag.Parse()
 	settings = &Settings{}
 
 	router = mux.NewRouter()
@@ -118,7 +119,7 @@ func main() {
 	readConfig()
 	initRoutes()
 
-	if initSerial() {
+	if initSerial() && *debug == false {
 		go ActionHandler()
 	} else {
 		go initMockData()
