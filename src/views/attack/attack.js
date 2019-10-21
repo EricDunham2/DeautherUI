@@ -35,8 +35,6 @@ Vue.component('attack', {
                 return;
             }
 
-            console.log(response.data)
-
             Object.values(response.data).forEach(ap => {
                 //ap.fmtMac = this._createMacString(ap.bssid);
 
@@ -44,6 +42,8 @@ Vue.component('attack', {
                     return;
                 }
                 
+                ap.LastSeen = Date.now();
+
                 ap.stations.forEach(sta => {
                     if (this.selectedStations != null && this.selectedStations.find(st => st.mac === sta.mac)) { 
                         sta.selected = true;
@@ -57,6 +57,12 @@ Vue.component('attack', {
             });
 
             this.accesspoints = Object.values(response.data);
+
+            this.accesspoints.forEach((ap, index, arr) => {
+                if (Date.now() - ap.LastSeen > 300000) {
+                    this.accesspoints.splice(index, 1);
+                }
+            })
         },
         _createMacString: function (arr) {
             return `${this._toHex(arr[0])}:${this._toHex(arr[1])}:${this._toHex(arr[2])}:${this._toHex(arr[3])}:${this._toHex(arr[4])}:${this._toHex(arr[5])}`;
@@ -256,12 +262,12 @@ Vue.component('attack', {
                 </div>
             </div>
             <div class="footer vhc" style="position:fixed; bottom:0; height:max-content; background:#112;">
-                <div class="col-100 vhc" v-if="selectedAccesspoint && hoveredItem" style="color:greenyellow;">
+                <div class="col-100 vhc" v-if="(selectedAccesspoint && hoveredItem) || (hoveredItem != null && hoveredItem.selected)" style="color:greenyellow;">
                     <div style="width: 40%; padding: 5px 5px 0 5px; font-size:13px;" class="vhc">VENDOR: <span v-text="hoveredItem.vendor"> </span></div>
                     <div style="width: 40%; padding: 5px 5px 0 5px; font-size:13px;" class="vhc">MAC: <span v-text="hoveredItem.fmtMac"></span></div>
                     <div style="width: 40%; padding: 5px 5px 0 5px; font-size:13px;" class="vhc">SSID: <span v-text="hoveredItem.ssid"></span></div>
                     <div style="width: 40%; padding: 5px 5px 0 5px; font-size:13px" class="vhc">RSSI: <span v-text="hoveredItem.rssi"></span></div>
-                    <div style="width: 40%; padding: 5px 5px 0 5px; font-size:13px;" class="vhc">ENCRYPTION: <span v-text="selectedAccesspoint.enc"></span></div>
+                    <div v-if="selectedAccesspoint" style="width: 40%; padding: 5px 5px 0 5px; font-size:13px;" class="vhc">ENCRYPTION: <span v-text="selectedAccesspoint.enc"></span></div>
                 </div>
                 <div class="vhc col-100">
                     <div class="vhc" style="width:100px; height:65px;">

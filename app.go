@@ -203,6 +203,7 @@ func generateData() string {
 	var data string
 
 	if rssi%2 == 0 {
+		log_message("DEBUG: Generated Accesspoint")
 
 		ms := MapRandomKeyGet(mockSSID).(string)
 		mb := mockSSID[ms]
@@ -210,6 +211,8 @@ func generateData() string {
 		data = fmt.Sprintf(`{"data_type": "accesspoint", "ssid": "%s", "enc": 2, "rssi": %d, "bssid":"%s", "channel": %d, "hidden": false}`, ms, rssi, mb, ch)
 
 	} else {
+		log_message("DEBUG: Generated Packet")
+
 		mac := mockPacketMac[rand.Intn(9)]
 
 		ms := MapRandomKeyGet(mockSSID).(string)
@@ -406,6 +409,7 @@ func DataHandler() {
 			break
 		case "accesspoint":
 			ap := AccessPoint{}
+			ap.Stations = []Station{}
 
 			if err = json.Unmarshal(buffer, &ap); err != nil {
 				log.Println(err.Error())
@@ -415,20 +419,20 @@ func DataHandler() {
 			}
 
 			if val, ok := AvailableAccesspoints[ap.Bssid]; ok {
-				val.Rssi = ap.Rssi
-				val.Ssid = ap.Ssid
-				val.Channel = ap.Channel
-				val.Hidden = ap.Hidden
-			} else {
-				ap.Stations = []Station{}
-				AvailableAccesspoints[ap.Bssid] = ap
+				ap.Stations = val.Stations
 			}
+
+			AvailableAccesspoints[ap.Bssid] = ap
 
 			break
 		default:
 			break
 		}
 	}
+}
+
+func RemoveIndex(s []int, index int) []int {
+	return append(s[:index], s[index+1:]...)
 }
 
 func getPackets(w http.ResponseWriter, r *http.Request) {

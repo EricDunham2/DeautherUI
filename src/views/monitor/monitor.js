@@ -157,11 +157,6 @@ Vue.component('monitor', {
     beforeDestroy() {},
     mounted() {
         var self = this;
-        this._createChart();
-
-        setInterval(function () {
-            self._updateChart();
-        }, 1000);
     },
     template: `
     <div class="flex-container col-100 no-touch-top vhc" style="max-height:100%; overflow-y:scroll;" id="monitor">
