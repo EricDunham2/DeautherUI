@@ -22,7 +22,8 @@ start() {
     pid_guard
 
     echo "Starting ${APP_NAME}"
-    "${BIN}" \ 2>&1 | tee "${OUT_LOG}" | logger -t deauther &
+    ./${BIN} \ 2>&1 | tee "${OUT_LOG}" | logger -t deauther &
+    #"${BIN}" \ 2>&1 | tee "${OUT_LOG}" | logger -t deauther &
     echo "${APP_NAME} Started"
 }
 
