@@ -1,4 +1,6 @@
 #! /bin/bash
+sudo chown eric:eric -R /opt/DeautherUI
+go build ../app.go
 
 sudo cp -i deauther /etc/init.d/
 sudo chmod +x /etc/init.d/deauther

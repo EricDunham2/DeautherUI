@@ -1,19 +1,19 @@
 #! /bin/bash
-# /etc/init.d/camera
+# /etc/init.d/deauther
 
 ### BEGIN INIT INFO
-# Provides:          camera
+# Provides:Deauther User Interface
 # Required-Start:    
 # Required-Stop:
 # Default-Start: 2 3 4 5
 # Default-Stop: 0 1 6
-# Short-Description: Starts camera for drone FPV.
+# Short-Description: Provides the web interface on localhost:3000 for the esp8266 deauther.
 ### END INIT INFO
 
 
 
 OUT_LOG=/dev/null
-BIN=/opt/Deauther/app
+BIN=/opt/DeautherUI/app
 PID_FILE=/run/deauther.pid
 APP_NAME="Deauther"
 INIT_FILE="/etc/init.d/deauther"
