@@ -1,0 +1,6 @@
+#! /bin/bash
+
+sudo cp -i deauther /etc/init.d/
+sudo chmod +x /etc/init.d/deauther
+sudo update-rc.d deauther defaults
+sudo service deauther start
