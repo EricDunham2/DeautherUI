@@ -2,7 +2,12 @@
 sudo chown eric:eric -R /opt/DeautherUI
 go build ../app.go
 
-yes | sudo cp -i deauther /etc/init.d/
-sudo chmod +x /etc/init.d/deauther
-sudo update-rc.d deauther defaults
-sudo service deauther start
+mv app ../.
+
+cd /opt/DeautherUI
+./app
+
+#yes | sudo cp -i deauther /etc/init.d/
+#sudo chmod +x /etc/init.d/deauther
+#sudo update-rc.d deauther defaults
+#sudo service deauther start

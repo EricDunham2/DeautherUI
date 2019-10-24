@@ -13,16 +13,17 @@
 
 
 OUT_LOG=/dev/null
-BIN=/opt/DeautherUI/app
+BIN=app
+CWD=/opt/DeautherUI
 PID_FILE=/run/deauther.pid
 APP_NAME="Deauther"
 INIT_FILE="/etc/init.d/deauther"
 
 start() {
     pid_guard
-
+    cd ${CWD}
     echo "Starting ${APP_NAME}"
-    ./${BIN} \ 2>&1 | tee "${OUT_LOG}" | logger -t deauther &
+    ./"${BIN}" \ 2>&1
     #"${BIN}" \ 2>&1 | tee "${OUT_LOG}" | logger -t deauther &
     echo "${APP_NAME} Started"
 }

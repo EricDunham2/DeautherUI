@@ -1,0 +1,10 @@
+[Unit]
+Description=Deauther User Interface
+Documentation=http://github.com
+
+[Service]
+ExecStart=. /usr/bin/deauther
+Type=simple
+
+[Install]
+WantedBy=multi-user.target
