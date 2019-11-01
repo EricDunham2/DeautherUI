@@ -1,8 +1,6 @@
 yes | sudo apt-get update
 yes | sudo apt-get upgrade
 
-cd Documents
-mkdir Workspace
 curl https://get.pimoroni.com/espiotphat | bash
 
 sudo apt-get install pimoroni

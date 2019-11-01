@@ -270,9 +270,16 @@ Vue.component('attack', {
                     <div v-if="selectedAccesspoint" style="width: 40%; padding: 5px 5px 0 5px; font-size:13px;" class="vhc">ENCRYPTION: <span v-text="selectedAccesspoint.enc"></span></div>
                 </div>
                 <div class="vhc col-100">
-                    <div class="vhc" style="width:100px; height:65px;">
-                        <input id="deauth" type="checkbox" role="button" class="toggle-btn" v-model="isAttacking" @click="toggleAttack()"/>
-                        <label for="deauth" class="toggle-lbl vh-center" style="width:100%; margin:0; border-radius:2px;" ><span class="v-center" style="text-transform: uppercase;">Start</span></label>
+
+                    <div class="input-group vhc">
+                        <div style="font-size:13px;" class="checkbox-label">
+                            <span v-if="!isAttacking">Attack</span>
+                            <span v-if="isAttacking">Attacking</span>
+                        </div>
+                        <label class="switch" for="deauth-checkbox">
+                            <input type="checkbox" id="deauth-checkbox" @change="toggleAttack()"/>
+                            <div class="slider round"></div>
+                        </label>
                     </div>
                 </div>
             </div>

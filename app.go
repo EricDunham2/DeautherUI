@@ -247,7 +247,7 @@ func initRoutes() {
 
 	//PAGES
 	router.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		tmpl := []string{"/templates/index.html"}
+		tmpl := []string{"./src/views/index.html"}
 
 		dir, err := os.Getwd()
 		if err != nil {
